@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xcopy:*)",
+      "Bash(robocopy:*)",
+      "Bash(mysql:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(php:*)",
+      "Bash(del check_deadlines.php setup_deadline_checker.bat 2)",
+      "Bash(nul)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
