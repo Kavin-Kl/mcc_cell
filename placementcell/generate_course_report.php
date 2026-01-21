@@ -9,7 +9,7 @@ ini_set("display_errors", 1);
 
 include("config.php");
 
-include("course_groups.php");
+include("course_groups_dynamic.php");
 $course = $_GET['course'] ?? '';
 
 // Normalize underscores to commas for matching with DB values

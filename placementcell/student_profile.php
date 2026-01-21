@@ -6,7 +6,7 @@ if (!isset($_SESSION['student_id'])) {
 }
 
 include("config.php");
-include("course_groups.php");
+include("course_groups_dynamic.php");
 
 $student_id = $_SESSION['student_id'];
 $error = "";
@@ -81,7 +81,12 @@ foreach ($ug_courses_grouped as $group) {
         $allUG = array_merge($allUG, $programs);
     }
 }
-$allPG = array_merge(...array_values($pg_courses));
+$allPG = [];
+foreach ($pg_courses_grouped as $group) {
+    foreach ($group as $programs) {
+        $allPG = array_merge($allPG, $programs);
+    }
+}
 ?>
 
 <div class="home-section">

@@ -2,7 +2,7 @@
 session_start();
 include("config.php");
 
-include('course_groups.php');
+include('course_groups_dynamic.php');
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_POST['upid']  = strtoupper(trim($_POST['upid'] ?? ''));
     $_POST['regno'] = strtoupper(trim($_POST['regno'] ?? ''));

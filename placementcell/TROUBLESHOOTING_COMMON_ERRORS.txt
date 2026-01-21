@@ -1,0 +1,240 @@
+================================================================================
+TROUBLESHOOTING COMMON ERRORS
+================================================================================
+
+This guide fixes the most common errors during installation.
+
+================================================================================
+ERROR 1: "Undefined variable $pg_courses_grouped"
+================================================================================
+
+Where it appears:
+- student_register.php (when student tries to register)
+- generate_course_report.php (when admin generates report)
+
+Full error message:
+"Warning: Undefined variable $pg_courses in C:\xampp\htdocs\placementcell\student_register.php on line 82"
+"Fatal error: Uncaught TypeError: array_values(): Argument #1 ($array) must be of type array, null given"
+
+CAUSE:
+-------
+Missing or corrupted course_groups.php file
+
+FIX:
+----
+1. Check if this file exists:
+   C:\xampp\htdocs\placementcell\course_groups.php
+
+2. If missing, ask the sender for this file
+
+3. If it exists but empty (0 KB), delete it and get a new copy
+
+4. Verify the file contains PHP code starting with:
+   <?php
+   $ug_courses_grouped = [
+
+5. After getting the file, refresh the page (Ctrl + F5)
+
+================================================================================
+ERROR 2: "Table doesn't exist" errors
+================================================================================
+
+Full error message:
+"Table 'admin_placement_db.students' doesn't exist"
+
+CAUSE:
+-------
+Database not imported or SQL scripts not run
+
+FIX:
+----
+1. Open phpMyAdmin: http://localhost/phpmyadmin
+
+2. Check if database exists: admin_placement_db
+   - If NO: You didn't import the main database
+   - If YES: Click on it and check for tables
+
+3. If database is empty:
+   - Import the admin_placement_db.sql file (main database)
+
+4. After importing, run:
+   - sql/create_admin_notifications.sql
+   - sql/add_missing_columns.sql
+
+================================================================================
+ERROR 3: "Cannot modify header information"
+================================================================================
+
+Full error message:
+"Warning: Cannot modify header information - headers already sent by..."
+
+CAUSE:
+-------
+Extra spaces or BOM before <?php tags
+
+FIX:
+----
+1. Open the file mentioned in error with Notepad++
+
+2. Make sure first line starts EXACTLY with <?php
+   - No spaces before it
+   - No blank lines before it
+
+3. Save file as UTF-8 without BOM
+
+4. Refresh page
+
+================================================================================
+ERROR 4: "Access denied for user 'root'"
+================================================================================
+
+Full error message:
+"Access denied for user 'root'@'localhost' (using password: NO/YES)"
+
+CAUSE:
+-------
+Wrong database credentials in config.php
+
+FIX:
+----
+1. Open: placementcell/config.php
+
+2. Check these lines:
+   $user = "root";
+   $pass = "";  // For XAMPP, usually blank
+
+3. For XAMPP: password is usually blank ("")
+   For WAMP: password might be "root" or blank
+
+4. Update and save
+
+5. Refresh page
+
+================================================================================
+ERROR 5: Pages are blank/white screen
+================================================================================
+
+CAUSE:
+-------
+PHP error that's not displayed
+
+FIX:
+----
+1. Check error log:
+   C:\xampp\apache\logs\error.log
+
+2. Look for the LAST error in the file
+
+3. The error will tell you what's wrong:
+   - Missing file?
+   - Syntax error?
+   - Missing function?
+
+4. Fix based on the error message
+
+================================================================================
+ERROR 6: "Call to undefined function mysqli_connect()"
+================================================================================
+
+CAUSE:
+-------
+PHP mysqli extension not enabled
+
+FIX:
+----
+1. Open: C:\xampp\php\php.ini
+
+2. Find line: ;extension=mysqli
+
+3. Remove the semicolon: extension=mysqli
+
+4. Save file
+
+5. Restart Apache in XAMPP Control Panel
+
+================================================================================
+ERROR 7: 404 Not Found
+================================================================================
+
+Full error:
+"Not Found - The requested URL was not found on this server"
+
+CAUSE:
+-------
+File in wrong location or Apache not running
+
+FIX:
+----
+1. Verify folder is here: C:\xampp\htdocs\placementcell\
+
+2. Check XAMPP Control Panel:
+   - Apache should be green/running
+   - MySQL should be green/running
+
+3. Correct URL should be:
+   http://localhost/placementcell/
+   (NOT http://localhost/placementcell041225/)
+
+4. Restart Apache if needed
+
+================================================================================
+ERROR 8: Database connection failed
+================================================================================
+
+Full error:
+"Database connection failed: Access denied..."
+
+CAUSE:
+-------
+MySQL not running or wrong credentials
+
+FIX:
+----
+1. Open XAMPP Control Panel
+
+2. Check MySQL is running (green)
+
+3. If not, click "Start" next to MySQL
+
+4. Open config.php and verify:
+   $host = "localhost";
+   $user = "root";
+   $pass = "";
+   $db   = "admin_placement_db";
+
+================================================================================
+QUICK DIAGNOSTIC CHECKLIST
+================================================================================
+
+Run through this when you have errors:
+
+[ ] Is XAMPP running? (Apache + MySQL both green)
+[ ] Is folder in correct location? (C:\xampp\htdocs\placementcell\)
+[ ] Does course_groups.php exist and have content?
+[ ] Did you import the main database? (admin_placement_db.sql)
+[ ] Did you run the 2 SQL scripts? (check in phpMyAdmin → Tables)
+[ ] Is config.php correct? (check database name, user, password)
+[ ] Did you clear browser cache? (Ctrl + Shift + Delete)
+[ ] Are you using the right URL? (http://localhost/placementcell/)
+
+================================================================================
+STILL GETTING ERRORS?
+================================================================================
+
+1. Take a screenshot of the FULL error message
+
+2. Check the error log:
+   C:\xampp\apache\logs\error.log
+   (Look at the LAST few lines)
+
+3. Copy the exact error message
+
+4. Ask the sender with:
+   - The screenshot
+   - The error log content
+   - Which page you were on
+   - What you clicked
+
+This helps diagnose the issue quickly.
+
+================================================================================

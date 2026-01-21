@@ -6,7 +6,7 @@ if (!isset($_SESSION['admin_id'])) {
     exit;
 }
 include("header.php");
-include("course_groups.php"); 
+include("course_groups_dynamic.php"); 
 
 function romanize($num) {
     $n = intval($num);
@@ -1153,7 +1153,6 @@ function filterCourses() {
 function saveCourses() {
   const checkboxes = document.querySelectorAll("#courseModal .ug-course:checked, #courseModal .pg-course:checked");
   let courses = Array.from(checkboxes).map(cb => cb.value);
-  selectedCoursesPerRole[currentRoleId] = courses;
 
   const allUG = document.querySelectorAll('.ug-course').length;
   const allPG = document.querySelectorAll('.pg-course').length;
@@ -1162,9 +1161,17 @@ function saveCourses() {
 
   let prefix = [];
   let remaining = [];
+  let coursesToSave = [...courses]; // Copy for saving to database
 
-  if (checkedUG === allUG) prefix.push("All UG Courses");
-  if (checkedPG === allPG) prefix.push("All PG Courses");
+  // Add markers to database if all selected
+  if (checkedUG === allUG && checkedUG > 0) {
+    prefix.push("All UG Courses");
+    coursesToSave.push("All UG"); // Add marker for database
+  }
+  if (checkedPG === allPG && checkedPG > 0) {
+    prefix.push("All PG Courses");
+    coursesToSave.push("All PG"); // Add marker for database
+  }
 
   courses.forEach(course => {
     const isUG = Array.from(document.querySelectorAll('.ug-course')).find(cb => cb.value === course);
@@ -1174,15 +1181,17 @@ function saveCourses() {
       (isUG && checkedUG === allUG) ||
       (isPG && checkedPG === allPG)
     ) {
-      // skip — covered by prefix
+      // skip — covered by prefix in display
     } else {
       remaining.push(course);
     }
   });
 
+  selectedCoursesPerRole[currentRoleId] = coursesToSave; // Save with markers
+
   const displayText = [...prefix, ...remaining].join(", ");
 
-  document.getElementById(`courses_${currentRoleId}`).value = courses.join(",");
+  document.getElementById(`courses_${currentRoleId}`).value = coursesToSave.join(",");
   document.getElementById(`display_courses_${currentRoleId}`).innerText = displayText;
 
   closeCourseModal();

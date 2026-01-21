@@ -1,0 +1,128 @@
+================================================================================
+REQUIRED FILES CHECKLIST
+================================================================================
+
+If you're getting errors, verify these CRITICAL files exist in your
+placementcell folder:
+
+================================================================================
+CRITICAL FILES (MUST EXIST)
+================================================================================
+
+1. config.php
+   Location: C:\xampp\htdocs\placementcell\config.php
+   Purpose: Database connection settings
+
+2. course_groups.php ⚠️ COMMONLY MISSING!
+   Location: C:\xampp\htdocs\placementcell\course_groups.php
+   Purpose: Defines all UG and PG courses
+   If missing: You'll get errors on student_register.php and generate_course_report.php
+
+3. header.php
+   Location: C:\xampp\htdocs\placementcell\header.php
+   Purpose: Navigation sidebar for admin
+
+4. footer.php
+   Location: C:\xampp\htdocs\placementcell\footer.php
+   Purpose: Footer HTML
+
+5. student_header.php
+   Location: C:\xampp\htdocs\placementcell\student_header.php
+   Purpose: Navigation for student portal
+
+================================================================================
+NEW FEATURE FILES (MUST EXIST)
+================================================================================
+
+6. check_deadlines_on_load.php
+   Location: C:\xampp\htdocs\placementcell\check_deadlines_on_load.php
+   Purpose: Auto-checks deadlines on page load
+
+7. admin_notifications.php
+   Location: C:\xampp\htdocs\placementcell\admin_notifications.php
+   Purpose: Notification center page
+
+8. edit_form_fields.php
+   Location: C:\xampp\htdocs\placementcell\edit_form_fields.php
+   Purpose: Form field customization page
+
+================================================================================
+SQL SCRIPTS FOLDER (MUST EXIST)
+================================================================================
+
+9. sql/create_admin_notifications.sql
+   Location: C:\xampp\htdocs\placementcell\sql\create_admin_notifications.sql
+   Purpose: Creates notification tables
+
+10. sql/add_missing_columns.sql
+    Location: C:\xampp\htdocs\placementcell\sql\add_missing_columns.sql
+    Purpose: Adds off-campus tracking columns
+
+================================================================================
+HOW TO VERIFY FILES EXIST
+================================================================================
+
+Method 1: Windows Explorer
+---------------------------
+1. Open: C:\xampp\htdocs\placementcell\
+2. Look for each file in the list above
+3. Check the file size - it should NOT be 0 KB
+
+Method 2: Open in Notepad
+--------------------------
+1. Right-click the file
+2. Select "Open with Notepad"
+3. File should have PHP code (not empty)
+
+================================================================================
+COMMON ERRORS CAUSED BY MISSING FILES
+================================================================================
+
+Error: "Undefined variable $pg_courses_grouped"
+File Missing: course_groups.php
+Fix: Get this file from the sender
+
+Error: "Call to undefined function"
+File Missing: Likely missing an include file (config.php, header.php, etc.)
+Fix: Verify all files were copied
+
+Error: "Table doesn't exist"
+File Missing: SQL scripts not run
+Fix: Run the SQL scripts in phpMyAdmin
+
+Error: "Cannot modify header information"
+File Missing: None - different issue (usually spacing/BOM in PHP files)
+Fix: Check for extra spaces before <?php tags
+
+================================================================================
+QUICK FIX: MISSING course_groups.php
+================================================================================
+
+If you're missing course_groups.php, ask the sender to:
+
+1. Go to their placementcell folder
+2. Find: course_groups.php
+3. Send it to you via WhatsApp/email
+4. You place it in: C:\xampp\htdocs\placementcell\
+
+OR ask them to copy the file contents and you create it manually.
+
+================================================================================
+VERIFY ALL FILES COPIED CORRECTLY
+================================================================================
+
+Run this checklist:
+
+[ ] config.php exists and has database settings
+[ ] course_groups.php exists and is NOT empty
+[ ] header.php exists
+[ ] footer.php exists
+[ ] student_header.php exists
+[ ] check_deadlines_on_load.php exists
+[ ] admin_notifications.php exists
+[ ] edit_form_fields.php exists
+[ ] sql folder exists with 2 .sql files inside
+
+If any file is missing, ask the sender to send just that file.
+
+================================================================================

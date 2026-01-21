@@ -1,0 +1,139 @@
+================================================================================
+WHAT TO TELL YOUR FRIEND
+================================================================================
+
+Hey! Here's what you need to do to set up the placement cell system:
+
+================================================================================
+PART 1: COPY FILES
+================================================================================
+
+1. Copy the "placementcell" folder to:
+   C:\xampp\htdocs\
+
+   So the path becomes: C:\xampp\htdocs\placementcell\
+
+================================================================================
+PART 2: SETUP DATABASE IN phpMyAdmin
+================================================================================
+
+Step 1: Import Main Database
+-----------------------------
+1. I'm sending you a file called: admin_placement_db.sql
+2. Open: http://localhost/phpmyadmin
+3. Click "New" and create database: admin_placement_db
+4. Click on the database
+5. Go to "Import" tab
+6. Upload the   file
+7. Click "Go" and wait
+
+Step 2: Run New Features SQL (Script 1)
+----------------------------------------
+1. Stay in phpMyAdmin (admin_placement_db selected)
+2. Click "SQL" tab
+3. Open this file in notepad:
+   placementcell/sql/create_admin_notifications.sql
+4. Copy everything from that file
+5. Paste into the SQL box
+6. Click "Go"
+
+You should see:
+✓ admin_notifications table created
+✓ deadline_notifications_sent table created
+✓ drives table altered
+
+Step 3: Run Missing Columns SQL (Script 2)
+-------------------------------------------
+1. Still in phpMyAdmin (admin_placement_db selected)
+2. Click "SQL" tab
+3. Open this file in notepad:
+   placementcell/sql/add_missing_columns.sql
+4. Copy everything
+5. Paste into SQL box
+6. Click "Go"
+
+You should see:
+✓ 2 columns added to students table
+
+================================================================================
+PART 3: UPDATE CONFIG FILE
+================================================================================
+
+1. Open: placementcell/config.php in notepad
+2. Check these lines match your setup:
+
+   $host = "localhost";
+   $user = "root";
+   $pass = "";  // Leave blank if using XAMPP default
+   $db   = "admin_placement_db";
+
+3. Save the file
+
+================================================================================
+PART 4: RUN DIAGNOSTIC TEST (VERY IMPORTANT!)
+================================================================================
+
+BEFORE doing anything else, run the diagnostic tool:
+
+1. Open browser: http://localhost/placementcell/test_debug.php
+
+2. This will automatically check:
+   ✓ All critical files exist (especially course_groups.php)
+   ✓ course_groups.php is working correctly
+   ✓ Database connection is OK
+   ✓ All required tables exist
+   ✓ Everything is ready to use
+
+3. What you should see:
+   - All GREEN checkmarks = Everything is perfect!
+   - Any RED errors = Follow the instructions to fix
+
+4. If you see GREEN everywhere:
+   - System is ready!
+   - DELETE the test_debug.php file (for security)
+   - Continue to Part 5
+
+5. If you see RED errors:
+   - Read what's missing/wrong
+   - Fix the issues
+   - Refresh test_debug.php to re-test
+   - Contact me with screenshot if stuck
+
+================================================================================
+PART 5: TEST THE SYSTEM
+================================================================================
+
+1. Open browser: http://localhost/placementcell
+2. Login with username and password I gave you
+3. You should see the dashboard
+4. Look for bell icon in sidebar (notifications)
+5. Click it - should open notifications page
+
+6. Test student registration:
+   - Go to: http://localhost/placementcell/student_register.php
+   - Fill the form
+   - Class/Year should be a DROPDOWN (not text field)
+   - Should have: First Year, Second Year, Third Year, Fourth Year
+   - Submit and verify it works
+
+================================================================================
+THAT'S IT!
+================================================================================
+
+If you see any errors:
+1. Run test_debug.php first (see Part 4)
+2. Send me screenshot of the error
+3. Tell me exactly what you were doing
+
+Files I'm sending you:
+----------------------
+✓ placementcell folder (entire folder with all files)
+✓ admin_placement_db.sql (database backup)
+
+Everything else is included in the placementcell folder.
+
+The SQL scripts you need are inside:
+- placementcell/sql/create_admin_notifications.sql
+- placementcell/sql/add_missing_columns.sql
+
+================================================================================

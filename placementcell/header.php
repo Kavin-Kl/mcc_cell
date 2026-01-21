@@ -36,6 +36,7 @@ $users_module_admins = ['Asgar Ahmed', 'Annie Shruthi'];
         "on_off_campus" => "Overall Placed Students",
         "course_specific_drive_data" => "Company Progress Tracker",
         "backup_module" => "Backup",
+        "manage_courses" => "Manage Courses",
         "index" => "Dashboard"
     ];
 
@@ -684,7 +685,15 @@ ul, ol {
                     <span class="links_name">Generate Report</span>
                 </a>
                 <span class="tooltip">Report</span>
-            </li> 
+            </li>
+
+            <li>
+                <a href="manage_courses.php" class="<?= $currentPage === 'manage_courses.php' ? 'active' : '' ?>">
+                    <i class="bi bi-book"></i>
+                    <span class="links_name">Manage Courses</span>
+                </a>
+                <span class="tooltip">Manage Courses</span>
+            </li>
 
 
             <?php if (isset($_SESSION['username']) && in_array($_SESSION['username'], $users_module_admins)): ?>

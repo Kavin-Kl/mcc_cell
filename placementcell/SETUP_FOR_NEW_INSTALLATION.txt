@@ -1,0 +1,340 @@
+================================================================================
+PLACEMENT CELL - SETUP GUIDE FOR NEW INSTALLATION
+================================================================================
+
+This guide is for someone who received this folder and needs to set it up
+on their own computer (XAMPP/WAMP).
+
+================================================================================
+PREREQUISITES
+================================================================================
+
+1. XAMPP or WAMP installed
+2. Apache and MySQL running
+3. PHP 8.0 or higher
+4. Web browser
+
+================================================================================
+STEP 1: COPY FILES TO WEB SERVER
+================================================================================
+
+1. Copy the entire "placementcell" folder to:
+   - For XAMPP: C:\xampp\htdocs\
+   - For WAMP: C:\wamp64\www\
+
+   Final path should be:
+   C:\xampp\htdocs\placementcell\
+   (or)
+   C:\wamp64\www\placementcell\
+
+================================================================================
+STEP 2: DATABASE SETUP
+================================================================================
+
+Option A: If You Have a Database Backup File (.sql)
+----------------------------------------------------
+1. Open phpMyAdmin: http://localhost/phpmyadmin
+2. Click "New" in the left sidebar
+3. Create database name: admin_placement_db
+4. Collation: utf8mb4_general_ci
+5. Click "Create"
+6. Select the "admin_placement_db" database
+7. Click "Import" tab
+8. Click "Choose File"
+9. Select the .sql backup file (if provided)
+10. Scroll down and click "Go"
+11. Wait for import to complete
+
+After importing, proceed to STEP 3 below.
+
+
+Option B: If You DON'T Have a Database Backup (Starting Fresh)
+---------------------------------------------------------------
+If you don't have a full database backup, you need to:
+
+1. Create the database
+2. Run all the SQL setup scripts manually
+
+Follow these sub-steps:
+
+B1. Create Database
+-------------------
+1. Open phpMyAdmin: http://localhost/phpmyadmin
+2. Click "New" in left sidebar
+3. Database name: admin_placement_db
+4. Collation: utf8mb4_general_ci
+5. Click "Create"
+
+B2. Import Main Database Schema
+--------------------------------
+Ask the person who sent you the folder for one of these:
+- Full database backup (.sql file)
+- OR the original database schema/structure SQL
+
+Without the main tables (students, drives, applications, etc.),
+the system won't work.
+
+IMPORTANT: You MUST have these tables:
+- students
+- drives
+- drive_roles
+- applications
+- placed_students
+- admin_users
+- And several others
+
+If you don't have the main schema, contact the person who sent you
+the folder and ask for:
+"Please export the admin_placement_db database and send me the .sql file"
+
+B3. After Main Schema is Imported
+----------------------------------
+Once you have the main database structure, continue to STEP 3.
+
+================================================================================
+STEP 3: RUN NEW FEATURES SQL SCRIPTS (REQUIRED)
+================================================================================
+
+These scripts add the new features (notifications and form customization).
+
+Script 1: Admin Notifications (REQUIRED)
+-----------------------------------------
+1. In phpMyAdmin, select database: admin_placement_db
+2. Click "SQL" tab
+3. Open file: placementcell/sql/create_admin_notifications.sql
+4. Copy ALL contents
+5. Paste into SQL box
+6. Click "Go"
+
+Expected result: 3 success messages
+- admin_notifications table created
+- deadline_notifications_sent table created
+- drives table altered (form_fields column added)
+
+Note: You might see "Duplicate column name 'form_fields'" - this is OK!
+
+
+Script 2: Missing Columns (OPTIONAL but Recommended)
+-----------------------------------------------------
+1. In phpMyAdmin, select database: admin_placement_db
+2. Click "SQL" tab
+3. Open file: placementcell/sql/add_missing_columns.sql
+4. Copy ALL contents
+5. Paste into SQL box
+6. Click "Go"
+
+Expected result: 2 columns added to students table
+- Offcampus_selection
+- editable_comment
+
+================================================================================
+STEP 4: CONFIGURE DATABASE CONNECTION
+================================================================================
+
+1. Open file: placementcell/config.php
+2. Update these settings to match your setup:
+
+   $host = "localhost";        // Usually "localhost"
+   $user = "root";             // Your MySQL username (usually "root")
+   $pass = "";                 // Your MySQL password (blank for XAMPP)
+   $db   = "admin_placement_db";
+
+3. Save the file
+
+4. Update mysqldump path (for backup feature):
+   - For XAMPP: 'C:\xampp\mysql\bin\mysqldump.exe'
+   - For WAMP: 'C:\wamp64\bin\mysql\mysql8.x.x\bin\mysqldump.exe'
+
+================================================================================
+STEP 5: CREATE ADMIN USER (IF NEEDED)
+================================================================================
+
+If you don't have an admin login, you need to create one:
+
+1. In phpMyAdmin, select database: admin_placement_db
+2. Click on "admin_users" table
+3. Click "Insert" tab
+4. Fill in:
+   - username: (your desired username, e.g., "admin")
+   - email: (your email)
+   - password_hash: Leave blank for now
+5. Click "Go"
+
+6. Now set the password:
+   - Click "SQL" tab
+   - Run this query (replace 'admin' with your username):
+
+   UPDATE admin_users
+   SET password_hash = '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
+   WHERE username = 'admin';
+
+   This sets password to: "password"
+   (You can change it after first login)
+
+7. Click "Go"
+
+================================================================================
+STEP 6: TEST THE INSTALLATION
+================================================================================
+
+1. Open browser and go to: http://localhost/placementcell
+
+2. You should see the admin login page
+
+3. Login with:
+   - Username: (the one you created)
+   - Password: password (if you used the above query)
+
+4. After login, you should see:
+   - Dashboard
+   - Bell icon in sidebar (notifications)
+   - All menu items working
+
+5. Test these features:
+   - Click bell icon → Should open notifications page (not log you out)
+   - Go to "Placement Registered Students" → Should load without errors
+   - Edit any drive → Should see "Customize Application Form" button
+
+================================================================================
+STEP 7: VERIFY NEW FEATURES ARE WORKING
+================================================================================
+
+Checklist:
+----------
+[ ] Database created: admin_placement_db
+[ ] All tables exist (check in phpMyAdmin)
+[ ] admin_notifications table exists
+[ ] deadline_notifications_sent table exists
+[ ] drives table has form_fields column
+[ ] students table has Offcampus_selection column
+[ ] students table has editable_comment column
+[ ] Can login to admin panel
+[ ] Bell icon visible in sidebar
+[ ] Clicking bell doesn't log you out
+[ ] Can access all pages without errors
+
+================================================================================
+COMMON ISSUES AND SOLUTIONS
+================================================================================
+
+Issue 1: "Database connection failed"
+--------------------------------------
+Solution: Check config.php file
+- Verify database name is correct: admin_placement_db
+- Verify username/password match your MySQL setup
+- Make sure MySQL is running in XAMPP/WAMP
+
+Issue 2: "Table doesn't exist" errors
+--------------------------------------
+Solution: You're missing the main database schema
+- Ask sender for full database backup (.sql file)
+- Import it in phpMyAdmin
+
+Issue 3: "Access denied for user 'root'"
+-----------------------------------------
+Solution: Password issue
+- In config.php, check the $pass variable
+- For XAMPP: Usually blank ("")
+- For WAMP: Might need "root" or blank
+
+Issue 4: Can't login (Invalid credentials)
+-------------------------------------------
+Solution: Create admin user (see STEP 5)
+- Or ask sender to export admin_users table
+
+Issue 5: Bell icon not showing
+-------------------------------
+Solution:
+- Clear browser cache (Ctrl + Shift + Delete)
+- Hard refresh (Ctrl + F5)
+- Check if create_admin_notifications.sql was run
+
+Issue 6: Pages show warnings/errors
+------------------------------------
+Solution:
+- Run add_missing_columns.sql script
+- Check PHP error log: xampp/apache/logs/error.log
+
+================================================================================
+WHAT TO REQUEST FROM SENDER (IF NEEDED)
+================================================================================
+
+If you're having issues, ask the sender for:
+
+1. Full database backup:
+   "Can you export the admin_placement_db database from phpMyAdmin
+    and send me the .sql file?"
+
+2. Admin credentials:
+   "What are the admin username and password?"
+
+3. Or ask them to export specific tables:
+   - students
+   - drives
+   - drive_roles
+   - applications
+   - admin_users
+   - placed_students
+   - on_off_campus_students
+   - form_links
+
+================================================================================
+FILE STRUCTURE (FOR REFERENCE)
+================================================================================
+
+placementcell/
+├── config.php                      # Database configuration
+├── index.php                       # Admin login page
+├── dashboard.php                   # Admin dashboard
+├── header.php                      # Navigation sidebar
+├── admin_notifications.php         # NEW: Notification center
+├── edit_form_fields.php           # NEW: Form field customizer
+├── check_deadlines_on_load.php    # NEW: Auto deadline checker
+├── sql/
+│   ├── create_admin_notifications.sql  # NEW FEATURE SQL
+│   └── add_missing_columns.sql         # OPTIONAL SQL
+├── QUICK_START.txt                # Quick reference guide
+├── SETUP_INSTRUCTIONS.txt         # Detailed setup guide
+└── NEW_FEATURES_README.md         # Feature documentation
+
+================================================================================
+SUPPORT
+================================================================================
+
+If you encounter issues:
+
+1. Check PHP error log:
+   - XAMPP: C:\xampp\apache\logs\error.log
+   - WAMP: C:\wamp64\logs\php_error.log
+
+2. Check MySQL is running:
+   - Open XAMPP/WAMP Control Panel
+   - Ensure Apache and MySQL are green/running
+
+3. Test database connection:
+   - Open phpMyAdmin: http://localhost/phpmyadmin
+   - Should see admin_placement_db in left sidebar
+
+4. Verify file permissions:
+   - Make sure placementcell folder is in htdocs/www
+   - Check files are readable (not locked)
+
+================================================================================
+COMPLETED SETUP!
+================================================================================
+
+Once all steps are complete, you should have a fully functional
+placement cell management system with:
+
+✓ Admin login
+✓ Drive management
+✓ Student registration
+✓ Application tracking
+✓ Placement records
+✓ Notification system (NEW)
+✓ Form field customization (NEW)
+✓ Deadline reminders (NEW)
+
+Access at: http://localhost/placementcell
+
+================================================================================

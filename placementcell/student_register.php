@@ -1,7 +1,7 @@
 <?php
 session_start();
 include "config.php";
-include "course_groups.php";
+include "course_groups_dynamic.php";
 
 $error = $_SESSION['error'] ?? "";
 $success = $_SESSION['success'] ?? "";
@@ -79,7 +79,12 @@ foreach ($ug_courses_grouped as $group) {
         $allUG = array_merge($allUG, $programs);
     }
 }
-$allPG = array_merge(...array_values($pg_courses));
+$allPG = [];
+foreach ($pg_courses_grouped as $group) {
+    foreach ($group as $programs) {
+        $allPG = array_merge($allPG, $programs);
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -339,7 +344,13 @@ button[type="submit"]:hover {
             </div>
             <div class="form-group">
               <label for="class">Class/Year *</label>
-              <input type="text" id="class" name="class" placeholder="e.g., Final Year, 3rd Year" required>
+              <select id="class" name="class" required>
+                <option value="">Select Year</option>
+                <option value="First Year">First Year</option>
+                <option value="Second Year">Second Year</option>
+                <option value="Third Year">Third Year</option>
+                <option value="Fourth Year">Fourth Year</option>
+              </select>
             </div>
           </div>
 
@@ -382,13 +393,21 @@ button[type="submit"]:hover {
   <script>
   const courseData = <?= json_encode([
     'UG' => [
-      'BCA' => $ug_courses_grouped['BCA'],
-      'B.COM' => $ug_courses_grouped['B.COM'],
-      'BBA' => $ug_courses_grouped['BBA'],
-      'BSc' => $ug_courses_grouped['BSc'],
-      'BA' => $ug_courses_grouped['BA']
+      'BCA' => ['Bachelor of Computer Applications'],
+      'B.COM' => ['BCom-General', 'BCom-Professional', 'BCom-Corporate Finance', 'BCom-International Accounting and Finance'],
+      'BBA' => ['BBA-Regular', 'BBA-Business Analytics', 'BBA-Branding & Advertising'],
+      'BSc' => ['BSc-Computer Science_Mathematics', 'BSc-Data Science', 'BSc-Biotechnology'],
+      'BA' => ['BA-Psychology', 'BA-Economics', 'BA-Journalism & Mass Communication'],
+      'All UG' => $allUG
     ],
-    'PG' => $pg_courses
+    'PG' => [
+      'MBA' => ['Master of Business Administration'],
+      'MCA' => ['Master of Computer Applications'],
+      'M.COM' => ['MCom-General', 'MCom-Financial Analysis', 'MCom-International Business'],
+      'MA' => ['MA-Economics', 'MA-English', 'MA-Public Policy'],
+      'MSc' => ['MSc-Computer Science (Data Science Specialization)', 'MSc-Biotechnology', 'MSc-Psychology'],
+      'All PG' => $allPG
+    ]
   ]) ?>;
 
   function updateProgramOptions() {

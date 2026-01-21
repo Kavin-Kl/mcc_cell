@@ -10,7 +10,7 @@ date_default_timezone_set('Asia/Kolkata');
 
 include("config.php");
 include("header.php");
-include("course_groups.php");
+include("course_groups_dynamic.php");
 
 // Store filters in session when form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['filter_submit'])) {

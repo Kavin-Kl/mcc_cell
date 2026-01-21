@@ -5,7 +5,7 @@ if (!isset($_SESSION['admin_id'])) {
     exit;
 }
 include("config.php");
-include("course_groups.php");
+include("course_groups_dynamic.php");
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_single_row'])) {
     $id = $_POST['row_id'];
     $spo = $_POST['spo_name'];

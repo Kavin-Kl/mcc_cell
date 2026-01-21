@@ -154,9 +154,14 @@ $selected_drive_id = $_GET['drive_id'] ?? null;
 
                           // Check eligibility
                           $eligible_courses = explode(',', $role['eligible_courses']);
+                          $eligible_courses = array_map('trim', $eligible_courses); // Trim whitespace
+
+                          // Check for "All UG" or "All PG" markers
                           $is_eligible = in_array($student['course'], $eligible_courses) ||
                                         in_array($student['program'], $eligible_courses) ||
-                                        in_array('All', $eligible_courses);
+                                        in_array('All', $eligible_courses) ||
+                                        (in_array('All UG', $eligible_courses) && $student['program_type'] == 'UG') ||
+                                        (in_array('All PG', $eligible_courses) && $student['program_type'] == 'PG');
 
                           $meets_percentage = !$role['min_percentage'] ||
                                              ($student['percentage'] && $student['percentage'] >= $role['min_percentage']);
@@ -167,9 +172,15 @@ $selected_drive_id = $_GET['drive_id'] ?? null;
                             <td><strong><?= htmlspecialchars($role['designation_name']) ?></strong></td>
                             <td>
                               <?php if ($role['offer_type'] == 'Internship'): ?>
-                                ₹<?= htmlspecialchars($role['stipend'] ?? 'N/A') ?>
+                                <?php
+                                  $stipend = trim($role['stipend'] ?? '');
+                                  echo $stipend !== '' ? '₹' . htmlspecialchars($stipend) : 'N/A';
+                                ?>
                               <?php else: ?>
-                                ₹<?= htmlspecialchars($role['ctc'] ?? 'N/A') ?>
+                                <?php
+                                  $ctc = trim($role['ctc'] ?? '');
+                                  echo $ctc !== '' ? '₹' . htmlspecialchars($ctc) : 'N/A';
+                                ?>
                               <?php endif; ?>
                             </td>
                             <td>

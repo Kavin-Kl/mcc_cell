@@ -16,7 +16,7 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 
 include("config.php");
-include("course_groups.php");
+include("course_groups_dynamic.php");
 
 // Initialize course arrays if not already set
 if (!isset($ug_courses_grouped)) $ug_courses_grouped = [];

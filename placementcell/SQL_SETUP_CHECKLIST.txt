@@ -1,0 +1,147 @@
+================================================================================
+QUICK SQL SETUP CHECKLIST
+================================================================================
+
+Your friend needs to run these SQL scripts in phpMyAdmin:
+
+================================================================================
+STEP 1: IMPORT MAIN DATABASE (REQUIRED)
+================================================================================
+
+**IMPORTANT: You need to send your friend the main database!**
+
+How to export (YOU do this):
+-----------------------------
+1. Open phpMyAdmin: http://localhost/phpmyadmin
+2. Click on "admin_placement_db" database
+3. Click "Export" tab
+4. Select "Quick" export method
+5. Format: SQL
+6. Click "Go"
+7. Save the file: admin_placement_db.sql
+8. Send this file to your friend
+
+How to import (YOUR FRIEND does this):
+---------------------------------------
+1. Open phpMyAdmin: http://localhost/phpmyadmin
+2. Click "New" → Create database: admin_placement_db
+3. Select the database
+4. Click "Import" tab
+5. Choose file: admin_placement_db.sql (the one you sent)
+6. Click "Go"
+7. Wait for success message
+
+================================================================================
+STEP 2: RUN NEW FEATURES SQL SCRIPTS (REQUIRED)
+================================================================================
+
+After importing main database, run these 2 scripts:
+
+Script 1: Admin Notifications System
+-------------------------------------
+File: placementcell/sql/create_admin_notifications.sql
+
+What it does:
+- Creates admin_notifications table (for deadline notifications)
+- Creates deadline_notifications_sent table (tracks which notifications sent)
+- Adds form_fields column to drives table (for form customization)
+
+How to run:
+1. phpMyAdmin → Select admin_placement_db
+2. Click "SQL" tab
+3. Copy contents from: create_admin_notifications.sql
+4. Paste and click "Go"
+
+Note: Might show "Duplicate column name" - this is OK!
+
+
+Script 2: Off-Campus Placement Columns
+---------------------------------------
+File: placementcell/sql/add_missing_columns.sql
+
+What it does:
+- Adds Offcampus_selection column to students table
+- Adds editable_comment column to students table
+
+How to run:
+1. phpMyAdmin → Select admin_placement_db
+2. Click "SQL" tab
+3. Copy contents from: add_missing_columns.sql
+4. Paste and click "Go"
+
+================================================================================
+SUMMARY: WHAT TO SEND YOUR FRIEND
+================================================================================
+
+Send these items:
+-----------------
+✓ The entire "placementcell" folder
+✓ Database backup file: admin_placement_db.sql (EXPORT IT FIRST!)
+
+Tell them to run:
+-----------------
+1. Import your admin_placement_db.sql file (main database)
+2. Run create_admin_notifications.sql (new features)
+3. Run add_missing_columns.sql (missing columns)
+
+That's it!
+
+================================================================================
+QUICK VERIFICATION
+================================================================================
+
+After your friend runs all SQL scripts, they should verify in phpMyAdmin:
+
+Tables should exist:
+-------------------
+✓ admin_notifications (NEW)
+✓ deadline_notifications_sent (NEW)
+✓ students
+✓ drives (should have form_fields column now)
+✓ drive_roles
+✓ applications
+✓ placed_students
+✓ admin_users
+✓ And more...
+
+Columns in students table:
+--------------------------
+✓ student_id
+✓ upid
+✓ reg_no
+✓ student_name
+✓ email
+✓ Offcampus_selection (NEW)
+✓ editable_comment (NEW)
+✓ And more...
+
+Columns in drives table:
+------------------------
+✓ drive_id
+✓ company_name
+✓ form_link
+✓ form_fields (NEW - JSON type)
+✓ And more...
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+If your friend says:
+--------------------
+"Table students doesn't exist"
+→ You forgot to send the main database backup!
+  Export admin_placement_db.sql and send it.
+
+"Can't login"
+→ Make sure admin_users table was imported with your backup
+
+"Bell icon not showing"
+→ They didn't run create_admin_notifications.sql
+  Tell them to run it again
+
+"Warnings on registered_students page"
+→ They didn't run add_missing_columns.sql
+  Tell them to run it
+
+================================================================================

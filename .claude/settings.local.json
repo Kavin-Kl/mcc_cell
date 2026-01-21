@@ -8,7 +8,10 @@
       "Bash(findstr:*)",
       "Bash(php:*)",
       "Bash(del check_deadlines.php setup_deadline_checker.bat 2)",
-      "Bash(nul)"
+      "Bash(nul)",
+      "Bash(ls:*)",
+      "Bash(cmd /c \"copy /Y C:\\xampp\\htdocs\\placementcell\\*.php C:\\Users\\Kavin\\Downloads\\placementcell041225\\placementcell\\ > nul 2>&1 && echo Files copied successfully\")",
+      "Bash(cmd /c \"if not exist C:\\Users\\Kavin\\Downloads\\placementcell041225\\placementcell\\sql mkdir C:\\Users\\Kavin\\Downloads\\placementcell041225\\placementcell\\sql && copy /Y C:\\xampp\\htdocs\\placementcell\\sql\\*.sql C:\\Users\\Kavin\\Downloads\\placementcell041225\\placementcell\\sql\\ > nul 2>&1 && echo SQL files copied successfully\")"
     ],
     "deny": [],
     "ask": []
