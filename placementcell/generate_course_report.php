@@ -112,9 +112,14 @@ if (!empty($UG_COURSES)) {
         IN ($placeholders)
         AND LOWER(Offcampus_selection) = 'placed'
     ");
-    $stmt->bind_param($types, ...$cleaned_ug);
-    $stmt->execute();
-    $ug_offcampus_placed = (int)$stmt->get_result()->fetch_assoc()['total'];
+    if ($stmt) {
+        $stmt->bind_param($types, ...$cleaned_ug);
+        $stmt->execute();
+        $ug_offcampus_placed = (int)$stmt->get_result()->fetch_assoc()['total'];
+    } else {
+        error_log("Prepare failed for UG off-campus query: " . $conn->error);
+        $ug_offcampus_placed = 0;
+    }
 }
 
 // ✅ Count PG Off-Campus Placed
@@ -138,9 +143,14 @@ if (!empty($PG_COURSES)) {
         IN ($placeholders)
         AND LOWER(Offcampus_selection) = 'placed'
     ");
-    $stmt->bind_param($types, ...$cleaned_pg);
-    $stmt->execute();
-    $pg_offcampus_placed = (int)$stmt->get_result()->fetch_assoc()['total'];
+    if ($stmt) {
+        $stmt->bind_param($types, ...$cleaned_pg);
+        $stmt->execute();
+        $pg_offcampus_placed = (int)$stmt->get_result()->fetch_assoc()['total'];
+    } else {
+        error_log("Prepare failed for PG off-campus query: " . $conn->error);
+        $pg_offcampus_placed = 0;
+    }
 }
 
 // === DATABASE QUERIES ===
@@ -187,9 +197,14 @@ $sql = "
   ) IN ($placeholders)
 ";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param($types, ...$cleaned_courses);
-$stmt->execute();
-$students_registered = $stmt->get_result()->fetch_assoc()['total'];
+if ($stmt) {
+    $stmt->bind_param($types, ...$cleaned_courses);
+    $stmt->execute();
+    $students_registered = $stmt->get_result()->fetch_assoc()['total'];
+} else {
+    error_log("Prepare failed for students_registered query: " . $conn->error);
+    $students_registered = 0;
+}
 
 // Students placed
 // Students placed (using same normalization as students_registered)
@@ -227,9 +242,14 @@ $stmt = $conn->prepare("
   ) IN ($placeholders)
   AND LOWER(status) = 'placed'
 ");
-$stmt->bind_param($types, ...$cleaned_courses);
-$stmt->execute();
-$students_placed = (int)$stmt->get_result()->fetch_assoc()['total'];
+if ($stmt) {
+    $stmt->bind_param($types, ...$cleaned_courses);
+    $stmt->execute();
+    $students_placed = (int)$stmt->get_result()->fetch_assoc()['total'];
+} else {
+    error_log("Prepare failed for students_placed query: " . $conn->error);
+    $students_placed = 0;
+}
 
 
 // Students defaulted
@@ -267,9 +287,14 @@ $stmt = $conn->prepare("
   ) IN ($placeholders)
   AND LOWER(status) = 'blocked'
 ");
-$stmt->bind_param($types, ...$cleaned_courses);
-$stmt->execute();
-$students_defaulted = (int)$stmt->get_result()->fetch_assoc()['total'];
+if ($stmt) {
+    $stmt->bind_param($types, ...$cleaned_courses);
+    $stmt->execute();
+    $students_defaulted = (int)$stmt->get_result()->fetch_assoc()['total'];
+} else {
+    error_log("Prepare failed for students_defaulted query: " . $conn->error);
+    $students_defaulted = 0;
+}
 
 
 $students_not_placed = $students_registered - $students_placed - $students_defaulted;
@@ -282,9 +307,14 @@ $stmt = $conn->prepare("
   IN ($placeholders)
   AND LOWER(Offcampus_selection) = 'placed'
 ");
-$stmt->bind_param($types, ...$cleaned_courses);
-$stmt->execute();
-$offcampus_placed = (int)$stmt->get_result()->fetch_assoc()['total'];
+if ($stmt) {
+    $stmt->bind_param($types, ...$cleaned_courses);
+    $stmt->execute();
+    $offcampus_placed = (int)$stmt->get_result()->fetch_assoc()['total'];
+} else {
+    error_log("Prepare failed for offcampus_placed query: " . $conn->error);
+    $offcampus_placed = 0;
+}
 
 // CTC
 // ✅ Fetch CTC values from placed_students.edit_ctc instead of drive_roles.ctc
@@ -326,17 +356,21 @@ $query = "
 ";
 
 $stmt = $conn->prepare($query);
-$stmt->bind_param($types, ...$cleaned_courses);
+if ($stmt) {
+    $stmt->bind_param($types, ...$cleaned_courses);
+    $stmt->execute();
+    $res = $stmt->get_result();
 
-$stmt->execute();
-$res = $stmt->get_result();
-
-while ($row = $res->fetch_assoc()) {
-    // Remove any non-numeric text like 'LPA', 'lpa', etc.
-    $clean_ctc = preg_replace('/[^0-9.]/', '', $row['edit_ctc']);
-    if ($clean_ctc !== '') {
-        $ctc_values[] = (float)$clean_ctc;
+    while ($row = $res->fetch_assoc()) {
+        // Remove any non-numeric text like 'LPA', 'lpa', etc.
+        $clean_ctc = preg_replace('/[^0-9.]/', '', $row['edit_ctc']);
+        if ($clean_ctc !== '') {
+            $ctc_values[] = (float)$clean_ctc;
+        }
     }
+} else {
+    error_log("Prepare failed for CTC values query: " . $conn->error);
+    $ctc_values = [];
 }
 sort($ctc_values);
 
@@ -350,9 +384,9 @@ $median_ctc = $ctc_values ? round($ctc_values[floor(count($ctc_values) / 2)], 2)
 $highest_ctc = $ctc_values ? max($ctc_values) : 0;
 
 // Companies recruited
-$stmt = $conn->prepare("SELECT DISTINCT d.company_name 
-                        FROM applications a 
-                        JOIN drives d ON a.drive_id = d.drive_id 
+$stmt = $conn->prepare("SELECT DISTINCT d.company_name
+                        FROM applications a
+                        JOIN drives d ON a.drive_id = d.drive_id
                         WHERE LOWER(
                           TRIM(
                             REPLACE(
@@ -383,12 +417,16 @@ $stmt = $conn->prepare("SELECT DISTINCT d.company_name
                           )
                         ) IN ($placeholders)
                         AND LOWER(a.status) = 'placed'");
-$stmt->bind_param($types, ...$cleaned_courses);
-
-$stmt->execute();
-$res = $stmt->get_result();
-while ($row = $res->fetch_assoc()) {
-    $companies[] = strtoupper($row['company_name']);
+if ($stmt) {
+    $stmt->bind_param($types, ...$cleaned_courses);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $companies[] = strtoupper($row['company_name']);
+    }
+} else {
+    error_log("Prepare failed for companies recruited query: " . $conn->error);
+    $companies = [];
 }
 
 // Companies visited & hired
@@ -406,9 +444,14 @@ $sql = "
     WHERE $where
 ";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param(str_repeat('s', count($params)), ...$params);
-$stmt->execute();
-$companies_visited = $stmt->get_result()->fetch_assoc()['total'] ?? 0;
+if ($stmt) {
+    $stmt->bind_param(str_repeat('s', count($params)), ...$params);
+    $stmt->execute();
+    $companies_visited = $stmt->get_result()->fetch_assoc()['total'] ?? 0;
+} else {
+    error_log("Prepare failed for companies_visited query: " . $conn->error);
+    $companies_visited = 0;
+}
 
 
 
@@ -447,10 +490,14 @@ $stmt = $conn->prepare("
     ) IN ($placeholders)
       AND LOWER(a.status) = 'placed'
 ");
-$stmt->bind_param($types, ...$cleaned_courses);
-
-$stmt->execute();
-$companies_hired = $stmt->get_result()->fetch_assoc()['hired'] ?? 0;
+if ($stmt) {
+    $stmt->bind_param($types, ...$cleaned_courses);
+    $stmt->execute();
+    $companies_hired = $stmt->get_result()->fetch_assoc()['hired'] ?? 0;
+} else {
+    error_log("Prepare failed for companies_hired query: " . $conn->error);
+    $companies_hired = 0;
+}
 
 
 // UG/PG split
@@ -465,8 +512,8 @@ if (!empty($UG_COURSES)) {
     $placeholders = implode(',', array_fill(0, count($cleaned_ug), '?'));
     $types = str_repeat('s', count($cleaned_ug));
    $stmt = $conn->prepare("
-  SELECT COUNT(*) as total 
-  FROM students 
+  SELECT COUNT(*) as total
+  FROM students
   WHERE LOWER(
     TRIM(
       REPLACE(
@@ -498,11 +545,16 @@ if (!empty($UG_COURSES)) {
   ) IN ($placeholders)
 ");
 
-    $stmt->bind_param($types, ...$cleaned_ug);
-    $stmt->execute();
-    $ug_registered = $stmt->get_result()->fetch_assoc()['total'];
-    $stmt = $conn->prepare("SELECT COUNT(DISTINCT upid) as total 
-FROM applications 
+    if ($stmt) {
+        $stmt->bind_param($types, ...$cleaned_ug);
+        $stmt->execute();
+        $ug_registered = $stmt->get_result()->fetch_assoc()['total'];
+    } else {
+        error_log("Prepare failed for UG registered query: " . $conn->error);
+        $ug_registered = 0;
+    }
+    $stmt = $conn->prepare("SELECT COUNT(DISTINCT upid) as total
+FROM applications
 WHERE LOWER(
   TRIM(
     REPLACE(
@@ -534,9 +586,14 @@ WHERE LOWER(
 ) IN ($placeholders)
 AND LOWER(status) = 'placed'
 ");
-    $stmt->bind_param($types, ...$cleaned_ug);
-    $stmt->execute();
-    $ug_placed = $stmt->get_result()->fetch_assoc()['total'];
+    if ($stmt) {
+        $stmt->bind_param($types, ...$cleaned_ug);
+        $stmt->execute();
+        $ug_placed = $stmt->get_result()->fetch_assoc()['total'];
+    } else {
+        error_log("Prepare failed for UG placed query: " . $conn->error);
+        $ug_placed = 0;
+    }
 }
 $ug_not_placed = $ug_registered - $ug_placed;
 
@@ -550,8 +607,8 @@ if (!empty($PG_COURSES)) {
     $placeholders = implode(',', array_fill(0, count($cleaned_pg), '?'));
     $types = str_repeat('s', count($cleaned_pg));
    $stmt = $conn->prepare("
-  SELECT COUNT(*) as total 
-  FROM students 
+  SELECT COUNT(*) as total
+  FROM students
   WHERE LOWER(
     TRIM(
       REPLACE(
@@ -583,11 +640,16 @@ if (!empty($PG_COURSES)) {
   ) IN ($placeholders)
 ");
 
-    $stmt->bind_param($types, ...$cleaned_pg);
-    $stmt->execute();
-    $pg_registered = $stmt->get_result()->fetch_assoc()['total'];
-    $stmt = $conn->prepare("SELECT COUNT(DISTINCT upid) as total 
-FROM applications 
+    if ($stmt) {
+        $stmt->bind_param($types, ...$cleaned_pg);
+        $stmt->execute();
+        $pg_registered = $stmt->get_result()->fetch_assoc()['total'];
+    } else {
+        error_log("Prepare failed for PG registered query: " . $conn->error);
+        $pg_registered = 0;
+    }
+    $stmt = $conn->prepare("SELECT COUNT(DISTINCT upid) as total
+FROM applications
 WHERE LOWER(
   TRIM(
     REPLACE(
@@ -619,9 +681,14 @@ WHERE LOWER(
 ) IN ($placeholders)
 AND LOWER(status) = 'placed'
 ");
-    $stmt->bind_param($types, ...$cleaned_pg);
-    $stmt->execute();
-    $pg_placed = $stmt->get_result()->fetch_assoc()['total'];
+    if ($stmt) {
+        $stmt->bind_param($types, ...$cleaned_pg);
+        $stmt->execute();
+        $pg_placed = $stmt->get_result()->fetch_assoc()['total'];
+    } else {
+        error_log("Prepare failed for PG placed query: " . $conn->error);
+        $pg_placed = 0;
+    }
 }
 $pg_not_placed = $pg_registered - $pg_placed;
 
