@@ -9,6 +9,7 @@ include("course_groups_dynamic.php");
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_single_row'])) {
     $id = $_POST['row_id'];
     $spo = $_POST['spo_name'];
+    $spoc_email = $_POST['spoc_email'] ?? '';
     $contact = $_POST['contact_no'];
     $follow = $_POST['follow_status'];
     $final = $_POST['final_status'];
@@ -35,8 +36,8 @@ $hiredCount = $row['count'] ?? 0;
     
     // Now update hired_count too!
     $stmt = $conn->prepare("
-      UPDATE drive_data 
-      SET spo_name = ?, contact_no = ?, follow_status = ?, final_status = ?, follow_up_person = ?, hired_count = ?
+      UPDATE drive_data
+      SET spo_name = ?, spoc_email = ?, contact_no = ?, follow_status = ?, final_status = ?, follow_up_person = ?, hired_count = ?
       WHERE id = ?
     ");
 
@@ -44,8 +45,8 @@ $hiredCount = $row['count'] ?? 0;
         die("Prepare failed: " . $conn->error);
     }
 
-    // Changed to "sssssii" to account for follow_up_person
-    if (!$stmt->bind_param("sssssii", $spo, $contact, $follow, $final, $person, $hiredCount, $id)) {
+    // Changed to "ssssssii" to account for spoc_email and follow_up_person
+    if (!$stmt->bind_param("ssssssii", $spo, $spoc_email, $contact, $follow, $final, $person, $hiredCount, $id)) {
         die("Bind failed: " . $stmt->error);
     }
 
@@ -208,7 +209,22 @@ $filtered = array_filter($data, function($r) use($filter) {
         if (!is_array($selected)) { $selected = [$selected]; }
         $selected = array_values(array_filter($selected, fn($v) => trim((string)$v) !== ''));
         $courses = is_array($r['eligible_courses']) ? $r['eligible_courses'] : [];
+
+        // Check if any selected course matches
         if (count(array_intersect($selected, $courses)) === 0) return false; // any-match
+
+        // If specific course(s) selected (not broad selections), exclude drives with broad course options
+        $broadTerms = ['ALL', 'all ug courses', 'all pg courses', 'All UG Courses', 'All PG Courses'];
+        $hasSpecificCourse = !in_array('ALL', $selected) && !in_array('ALL_UG', $selected) && !in_array('ALL_PG', $selected);
+
+        if ($hasSpecificCourse) {
+            // Exclude if eligible_courses contains any broad terms
+            foreach ($broadTerms as $broad) {
+                if (in_array($broad, $courses)) {
+                    return false;
+                }
+            }
+        }
     }
 
     return true;
@@ -225,9 +241,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'export') {
     
     // Get selected fields from POST or use default
     $selectedFields = $_POST['export_fields'] ?? [
-        'company_name', 'drive_number', 'role', 'offer_type', 'sector', 
+        'company_name', 'drive_number', 'role', 'offer_type', 'sector',
         'courses', 'opening_date', 'closing_date', 'created_by',
-        'spo_name', 'contact_no', 'follow_status', 'final_status', 
+        'spo_name', 'spoc_email', 'contact_no', 'follow_status', 'final_status',
         'hired_count', 'follow_up_person'
     ];
     array_unshift($selectedFields, 'slno'); // Always add Sl No as the first column
@@ -245,7 +261,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'export') {
         'closing_date' => 'Role Close Date',
         'created_by' => 'Created By',
         'spo_name' => 'SPOC Name',
-        'contact_no' => 'Contact Details',
+        'spoc_email' => 'SPOC Email ID',
+        'contact_no' => 'SPOC Contact Number',
         'follow_status' => 'Follow-Up Status',
         'final_status' => 'Final Status',
         'hired_count' => 'Hired',
@@ -274,6 +291,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'export') {
                 stripos(formatCourseDisplay($r['eligible_courses']), $search) === false &&
                 stripos((string)$r['created_by'], $search) === false &&
                 stripos((string)$r['spo_name'], $search) === false &&
+                stripos((string)$r['spoc_email'], $search) === false &&
                 stripos((string)$r['contact_no'], $search) === false &&
                 stripos((string)$r['follow_status'], $search) === false &&
                 stripos((string)$r['final_status'], $search) === false &&
@@ -318,7 +336,22 @@ if (isset($_GET['action']) && $_GET['action'] === 'export') {
             if (!is_array($selected)) { $selected = [$selected]; }
             $selected = array_values(array_filter($selected, fn($v) => trim((string)$v) !== ''));
             $courses = is_array($r['eligible_courses']) ? $r['eligible_courses'] : [];
+
+            // Check if any selected course matches
             if (count(array_intersect($selected, $courses)) === 0) return false;
+
+            // If specific course(s) selected (not broad selections), exclude drives with broad course options
+            $broadTerms = ['ALL', 'all ug courses', 'all pg courses', 'All UG Courses', 'All PG Courses'];
+            $hasSpecificCourse = !in_array('ALL', $selected) && !in_array('ALL_UG', $selected) && !in_array('ALL_PG', $selected);
+
+            if ($hasSpecificCourse) {
+                // Exclude if eligible_courses contains any broad terms
+                foreach ($broadTerms as $broad) {
+                    if (in_array($broad, $courses)) {
+                        return false;
+                    }
+                }
+            }
         }
 
         return true;
@@ -395,6 +428,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'export') {
         'closing_date' => 18,
         'created_by' => 20,
         'spo_name' => 20,
+        'spoc_email' => 25,
         'contact_no' => 15,
         'follow_status' => 20,
         'final_status' => 20,
@@ -883,7 +917,8 @@ table.company-table th.sticky-col { background: #650000; z-index: 5; }
                     <th>Form Open Date</th>
                     <th>Role Close Date</th>
                     <th class="w-spoc">SPOC Name</th>
-                    <th class="w-contact">Contact Details</th>
+                    <th class="w-spoc-email">SPOC Email ID</th>
+                    <th class="w-contact">SPOC Contact Number</th>
                     <th class="w-followup-status">Follow-Up Status</th>
                     <th class="w-final-status">Final Status</th>
                     <th class="w-hired">Hired</th>
@@ -914,6 +949,7 @@ table.company-table th.sticky-col { background: #650000; z-index: 5; }
                     <td data-open-iso="<?= htmlspecialchars(!empty($row['opening_date']) ? date('Y-m-d', strtotime($row['opening_date'])) : '') ?>"><?= $openFmt ?></td>
                     <td data-close-iso="<?= htmlspecialchars(!empty($row['closing_date']) ? date('Y-m-d', strtotime($row['closing_date'])) : '') ?>"><?= $closeFmt ?></td>
                     <td class="w-spoc"><input type="text" name="spo_name" class="form-control form-control-sm" value="<?= htmlspecialchars($row['spo_name'] ?? '') ?>"></td>
+                    <td class="w-spoc-email"><input type="email" name="spoc_email" class="form-control form-control-sm" value="<?= htmlspecialchars($row['spoc_email'] ?? '') ?>"></td>
                     <td class="w-contact"><input type="text" name="contact_no" class="form-control form-control-sm" value="<?= htmlspecialchars($row['contact_no'] ?? '') ?>"></td>
                     <td class="w-followup-status"><input type="text" name="follow_status" class="form-control form-control-sm" value="<?= htmlspecialchars($row['follow_status'] ?? '') ?>"></td>
                     <td class="w-final-status">
@@ -1144,10 +1180,15 @@ table.company-table th.sticky-col { background: #650000; z-index: 5; }
           <input type="checkbox" id="spo_name" name="export_fields[]" value="spo_name">
           <label for="spo_name">SPOC Name</label>
         </div>
-        
+
+        <div class="export-field-item">
+          <input type="checkbox" id="spoc_email" name="export_fields[]" value="spoc_email">
+          <label for="spoc_email">SPOC Email ID</label>
+        </div>
+
         <div class="export-field-item">
           <input type="checkbox" id="contact_no" name="export_fields[]" value="contact_no">
-          <label for="contact_no">Contact Details</label>
+          <label for="contact_no">SPOC Contact Number</label>
         </div>
         
         <div class="export-field-item">

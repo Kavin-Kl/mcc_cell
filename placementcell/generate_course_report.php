@@ -16,17 +16,22 @@ $course = $_GET['course'] ?? '';
 $normalized_course = str_replace('_', ',', $course);
 
 // === SELECTED COURSES ===
-// === SELECTED COURSES ===
-// === SELECTED COURSES ===
 $selectedCourses = [];
 
+// Check for special "ALL" options first
 if ($course === 'ALL') {
     $selectedCourses = array_merge($UG_COURSES, $PG_COURSES);
 } elseif ($course === 'ALL_UG') {
     $selectedCourses = $UG_COURSES;
 } elseif ($course === 'ALL_PG') {
     $selectedCourses = $PG_COURSES;
-} elseif (isset($ug_courses_grouped[$course])) {
+}
+// Check if it's an individual course from UG_COURSES or PG_COURSES
+elseif (in_array($course, $UG_COURSES) || in_array($course, $PG_COURSES)) {
+    $selectedCourses = [$course];
+}
+// Check if it's a school/department group (only if not an individual course)
+elseif (isset($ug_courses_grouped[$course])) {
     foreach ($ug_courses_grouped[$course] as $level => $courses) {
         $selectedCourses = array_merge($selectedCourses, $courses);
     }
@@ -34,23 +39,10 @@ if ($course === 'ALL') {
     foreach ($pg_courses_grouped[$course] as $level => $courses) {
         $selectedCourses = array_merge($selectedCourses, $courses);
     }
-} elseif (!empty($course)) {
-    $selectedCourses = [$course];
 }
-
-
-// ✅ Handle individual course selection (UG or PG)
-else {
-    foreach ($UG_COURSES as $ug) {
-        if ($course === $ug) {
-            $selectedCourses[] = $ug;
-        }
-    }
-    foreach ($PG_COURSES as $pg) {
-        if ($course === $pg) {
-            $selectedCourses[] = $pg;
-        }
-    }
+// If none of the above, treat it as a single course
+elseif (!empty($course)) {
+    $selectedCourses = [$course];
 }
 
 // Fallback if still empty
@@ -437,11 +429,21 @@ foreach ($selectedCourses as $sc) {
 }
 $where = implode(' OR ', $orLikes);
 
+// If filtering for a specific course (not ALL/ALL_UG/ALL_PG), exclude drives with broad course selections
+$excludeBroad = '';
+if ($course !== 'ALL' && $course !== 'ALL_UG' && $course !== 'ALL_PG' && !isset($ug_courses_grouped[$course]) && !isset($pg_courses_grouped[$course])) {
+    $excludeBroad = " AND eligible_courses NOT LIKE '%\"ALL\"%'
+                      AND eligible_courses NOT LIKE '%\"all ug courses\"%'
+                      AND eligible_courses NOT LIKE '%\"all pg courses\"%'
+                      AND eligible_courses NOT LIKE '%\"All UG Courses\"%'
+                      AND eligible_courses NOT LIKE '%\"All PG Courses\"%'";
+}
+
 $sql = "
     SELECT COUNT(DISTINCT d.company_name) AS total
     FROM drives d
     JOIN drive_data dd ON d.drive_id = dd.drive_id
-    WHERE $where
+    WHERE $where $excludeBroad
 ";
 $stmt = $conn->prepare($sql);
 if ($stmt) {

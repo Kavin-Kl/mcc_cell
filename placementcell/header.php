@@ -37,6 +37,7 @@ $users_module_admins = ['Asgar Ahmed', 'Annie Shruthi'];
         "course_specific_drive_data" => "Company Progress Tracker",
         "backup_module" => "Backup",
         "manage_courses" => "Manage Courses",
+        "data_migration" => "Data Migration",
         "index" => "Dashboard"
     ];
 
@@ -693,6 +694,14 @@ ul, ol {
                     <span class="links_name">Manage Courses</span>
                 </a>
                 <span class="tooltip">Manage Courses</span>
+            </li>
+
+            <li>
+                <a href="data_migration.php" class="<?= $currentPage === 'data_migration.php' ? 'active' : '' ?>">
+                    <i class="bi bi-arrow-left-right"></i>
+                    <span class="links_name">Data Migration</span>
+                </a>
+                <span class="tooltip">Import/Export Data</span>
             </li>
 
 

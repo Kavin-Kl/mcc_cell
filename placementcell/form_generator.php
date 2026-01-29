@@ -148,15 +148,24 @@ if ($form_link === '') {
 
 // Query using form_link!
 $stmt = $conn->prepare("SELECT * FROM drives WHERE form_link = ?");
+if (!$stmt) {
+    die("<div style='
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 20px;
+      color: #cc0000;
+      margin-top: 50px;
+    '>Database error: " . htmlspecialchars($conn->error) . "</div>");
+}
 $stmt->bind_param("s", $form_link);
 $stmt->execute();
 $res = $stmt->get_result();
 
 if ($res->num_rows === 0) {
  die("<div style='
-  text-align: center; 
-  font-family: Arial, Helvetica, sans-serif; 
-  font-size: 20px; 
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
   color: #cc0000;
   margin-top: 50px;
 '>Invalid form link.</div>");
@@ -247,6 +256,9 @@ $extraDetails = json_decode($drive['extra_details'] ?? '', true);
 
 // Fetch Roles
 $rolesQuery = $conn->prepare("SELECT * FROM drive_roles WHERE drive_id = ?");
+if (!$rolesQuery) {
+    die("Database error fetching roles: " . htmlspecialchars($conn->error));
+}
 $rolesQuery->bind_param("i", $drive['drive_id']);
 $rolesQuery->execute();
 $rolesResult = $rolesQuery->get_result();
@@ -443,9 +455,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Validate UPID
     $checkUpid = $conn->prepare("SELECT * FROM students WHERE upid = ?");
-    $checkUpid->bind_param("s", $upid);
-    $checkUpid->execute();
-    $resultUpid = $checkUpid->get_result();
+    if (!$checkUpid) {
+        $errorUpid = "Database error: " . htmlspecialchars($conn->error);
+    } else {
+        $checkUpid->bind_param("s", $upid);
+        $checkUpid->execute();
+        $resultUpid = $checkUpid->get_result();
 
     if ($resultUpid->num_rows === 0) {
     $errorUpid = "Invalid Placement ID.";
@@ -497,12 +512,16 @@ if ($normalizedSelected !== $normalizedActual) {
 
         // Check if already applied for this drive
         $checkApplication = $conn->prepare("SELECT 1 FROM applications WHERE student_id = ? AND drive_id = ?");
-        $checkApplication->bind_param("ii", $studentId, $drive['drive_id']);
-        $checkApplication->execute();
-        $checkApplication->store_result();
+        if (!$checkApplication) {
+            $errorField = "Database error: " . htmlspecialchars($conn->error);
+        } else {
+            $checkApplication->bind_param("ii", $studentId, $drive['drive_id']);
+            $checkApplication->execute();
+            $checkApplication->store_result();
 
-        if ($checkApplication->num_rows > 0) {
-            $errorField = "You have already submitted the application for this Company.";
+            if ($checkApplication->num_rows > 0) {
+                $errorField = "You have already submitted the application for this Company.";
+            }
         }
         if (!empty($errorField)) {
     $eligibleRoles = [];
@@ -676,6 +695,10 @@ if (move_uploaded_file($tmp, $targetPath)) {
                     $priority = $_POST['selected_roles_priority'][$roleId] ?? 1;
 
                     $checkQuery = $conn->prepare("SELECT 1 FROM applications WHERE student_id = ? AND drive_id = ? AND role_id = ?");
+                    if (!$checkQuery) {
+                        error_log("Database error in form_generator checkQuery: " . $conn->error);
+                        continue;
+                    }
                     $checkQuery->bind_param("iii", $studentId, $drive['drive_id'], $roleId);
                     $checkQuery->execute();
                     $checkQuery->store_result();
@@ -691,13 +714,18 @@ if (move_uploaded_file($tmp, $targetPath)) {
 
                     $fieldJson = json_encode($fieldData);
 
-                  $insert = $conn->prepare("INSERT INTO applications 
-    (student_id, drive_id, role_id, percentage, course, priority, student_data, upid, reg_no) 
+                  $insert = $conn->prepare("INSERT INTO applications
+    (student_id, drive_id, role_id, percentage, course, priority, student_data, upid, reg_no)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-$insert->bind_param("iiissssss",
-    $studentId, $drive['drive_id'], $roleId,
-    $percentage, $course, $priority, $fieldJson, $upid, $regno);
+                    if (!$insert) {
+                        error_log("Database error in form_generator INSERT: " . $conn->error);
+                        continue;
+                    }
+
+                    $insert->bind_param("iiissssss",
+                        $studentId, $drive['drive_id'], $roleId,
+                        $percentage, $course, $priority, $fieldJson, $upid, $regno);
 
                     $insert->execute();
                 }

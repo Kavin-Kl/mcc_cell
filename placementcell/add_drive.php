@@ -312,9 +312,6 @@ $stmt->bind_param(
 
   <h4>Extra Drive Details</h4>
 
-<label>CTC Details:</label>
-<input type="text" id="ctcDetails"><br>
-
 <label>Mode of Work:</label>
 <input type="text" id="workMode"><br>
 
@@ -327,14 +324,8 @@ $stmt->bind_param(
 <label>Eligibility Notes / Restrictions:</label>
 <input type="text" id="eligibilityNote"><br>
 
-<label>Application Deadline:</label>
-<input type="text" id="deadlineNote"><br>
-
   <label>No. of Vacancies:</label>
   <input type="text" id="vacancies"><br>
-
-  <label>Location:</label>
-  <input type="text" id="location"><br>
 
   <label>Duration:</label>
   <input type="text" id="duration"><br>
@@ -1252,18 +1243,15 @@ function saveExtraDetails(fromClose = false) {
 
   const details = {
     vacancies: document.getElementById('vacancies').value,
-    location: document.getElementById('location').value,
     duration: document.getElementById('duration').value,
     stipend: document.getElementById('stipend').value,
     postInternship: document.getElementById('postInternship').value,
     timings: document.getElementById('timings').value,
     whatsapp: document.getElementById('whatsapp').value,
-    ctcDetails: document.getElementById('ctcDetails')?.value || '',
     workMode: document.getElementById('workMode')?.value || '',
     officeAddress: document.getElementById('officeAddress')?.value || '',
     interviewDetails: document.getElementById('interviewDetails')?.value || '',
     eligibilityNote: document.getElementById('eligibilityNote')?.value || '',
-    deadlineNote: document.getElementById('deadlineNote')?.value || '',
     additionalInfo: document.getElementById('additionalInfo')?.value || ''
   };
 
@@ -2081,7 +2069,7 @@ function loadSimpleInputs(data) {
 
 
 function getExtraDetailsData() {
-  const ids = ['ctcDetails', 'workMode', 'officeAddress', 'interviewDetails', 'eligibilityNote', 'deadlineNote', 'vacancies', 'location', 'duration', 'stipend', 'postInternship', 'timings', 'whatsapp', 'additionalInfo'];
+  const ids = ['workMode', 'officeAddress', 'interviewDetails', 'eligibilityNote', 'vacancies', 'duration', 'stipend', 'postInternship', 'timings', 'whatsapp', 'additionalInfo'];
   const data = {};
   ids.forEach(id => {
     const el = document.getElementById(id);
@@ -2091,7 +2079,7 @@ function getExtraDetailsData() {
 }
 
 function loadExtraDetailsData(data) {
-  const ids = ['ctcDetails', 'workMode', 'officeAddress', 'interviewDetails', 'eligibilityNote', 'deadlineNote', 'vacancies', 'location', 'duration', 'stipend', 'postInternship', 'timings', 'whatsapp', 'additionalInfo'];
+  const ids = ['workMode', 'officeAddress', 'interviewDetails', 'eligibilityNote', 'vacancies', 'duration', 'stipend', 'postInternship', 'timings', 'whatsapp', 'additionalInfo'];
   ids.forEach(id => {
     const el = document.getElementById(id);
     if (el && data[id] !== undefined) {
