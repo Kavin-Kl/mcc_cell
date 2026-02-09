@@ -31,8 +31,12 @@ $users_module_admins = ['Asgar Ahmed', 'Annie Shruthi'];
         "dashboard" => "Dashboard",
         "add_drive" => "Add Drive",
         "enrolled_students" => "Applications List",
-        "registered_students" => "Placement Registered Students",
-        "placed_students" => "On Campus Placed Students",
+        "registered_students" => "Final Year Registered Students",
+        "placed_students" => "Final Year Placed Students",
+        "internship_registered_students" => "Internship Registered Students",
+        "internship_placed_students" => "Internship Placed Students",
+        "vantage_registered_students" => "Vantage Registered Students",
+        "vantage_placed_students" => "Vantage Placed Students",
         "on_off_campus" => "Overall Placed Students",
         "course_specific_drive_data" => "Company Progress Tracker",
         "backup_module" => "Backup",
@@ -311,14 +315,14 @@ body {
 .sidebar li.profile {
     position: fixed;
     left: 0;
-    bottom: 5px;   /* push up a bit */
+    bottom: 10px;   /* push up a bit more */
     height: 50px;   /* enough space for icon + text */
     width: 50px;
     align-items: center;
     background: #650000;
     border-radius: 12px;
     transition: all 0.5s ease;
-    z-index: 2;
+    z-index: 999;
     flex-shrink: 0;
     margin-left: 5px;
 }
@@ -383,6 +387,7 @@ body {
     position: relative;
     left: 78px; /* Default collapsed sidebar width */
     width: calc(100% - 78px);
+    box-sizing: border-box; /* include padding in width so content doesn't overflow */
     transition: all 0.5s ease;
     padding: 20px;
 }
@@ -459,8 +464,9 @@ ul, ol {
     flex: 1; /* takes all available space except scrollbar */
     overflow-y: auto;
     overflow-x: hidden;
-    height: calc(100vh - 190px);
+    height: calc(100vh - 175px);
     scrollbar-width: thin;
+    padding-bottom: 90px; /* must clear fixed logout button (50px) + bottom offset (10px) + buffer */
 }
 
 
@@ -633,17 +639,49 @@ ul, ol {
             <li>
                 <a href="registered_students.php" class="<?= $currentPage === 'registered_students.php' ? 'active' : '' ?>">
                     <i class="bi bi-person-vcard"></i>
-                    <span class="links_name">Placement Registered Students</span>
+                    <span class="links_name">Final Year Registered Students</span>
                 </a>
-                <span class="tooltip">Placement Registered</span>
+                <span class="tooltip">Final Year Registered</span>
             </li>
 
             <li>
                 <a href="placed_students.php" class="<?= $currentPage === 'placed_students.php' ? 'active' : '' ?>">
                     <i class="bi bi-briefcase"></i>
-                    <span class="links_name">Placed Students</span>
+                    <span class="links_name">Final Year Placed Students</span>
                 </a>
-                <span class="tooltip">Placed Students</span>
+                <span class="tooltip">Final Year Placed</span>
+            </li>
+
+            <li>
+                <a href="internship_registered_students.php" class="<?= $currentPage === 'internship_registered_students.php' ? 'active' : '' ?>">
+                    <i class="bi bi-journal-code"></i>
+                    <span class="links_name">Internship Registered Students</span>
+                </a>
+                <span class="tooltip">Internship Registered</span>
+            </li>
+
+            <li>
+                <a href="internship_placed_students.php" class="<?= $currentPage === 'internship_placed_students.php' ? 'active' : '' ?>">
+                    <i class="bi bi-file-earmark-check"></i>
+                    <span class="links_name">Internship Placed Students</span>
+                </a>
+                <span class="tooltip">Internship Placed</span>
+            </li>
+
+            <li>
+                <a href="vantage_registered_students.php" class="<?= $currentPage === 'vantage_registered_students.php' ? 'active' : '' ?>">
+                    <i class="bi bi-star"></i>
+                    <span class="links_name">Vantage Registered Students</span>
+                </a>
+                <span class="tooltip">Vantage Registered</span>
+            </li>
+
+            <li>
+                <a href="vantage_placed_students.php" class="<?= $currentPage === 'vantage_placed_students.php' ? 'active' : '' ?>">
+                    <i class="bi bi-star-fill"></i>
+                    <span class="links_name">Vantage Placed Students</span>
+                </a>
+                <span class="tooltip">Vantage Placed</span>
             </li>
 
             <li>

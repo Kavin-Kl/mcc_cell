@@ -13,18 +13,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['register'])) {
     $student_name = trim($_POST['student_name']);
     $email = trim($_POST['email']);
     $phone_no = trim($_POST['phone_no']);
-    $program_type = $_POST['program_type'];
-    $program = $_POST['program'];
-    $course = $_POST['course'];
-    $class = $_POST['class'];
-    $year_of_passing = $_POST['year_of_passing'];
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
     // Validation
     if (empty($upid) || empty($reg_no) || empty($student_name) || empty($email) ||
-        empty($phone_no) || empty($program_type) || empty($program) || empty($course) ||
-        empty($class) || empty($year_of_passing) || empty($password) || empty($confirm_password)) {
+        empty($phone_no) || empty($password) || empty($confirm_password)) {
         $_SESSION['error'] = "All fields are required.";
         header("Location: student_register.php");
         exit;
@@ -42,14 +36,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['register'])) {
         exit;
     }
 
-    // Check if UPID or Reg No already exists
-    $check_stmt = $conn->prepare("SELECT student_id FROM students WHERE upid = ? OR reg_no = ? OR email = ?");
-    $check_stmt->bind_param("sss", $upid, $reg_no, $email);
+    // Check if UPID exists in the imported students list
+    $check_stmt = $conn->prepare("SELECT student_id, upid, reg_no, student_name, email, phone_no, program_type, program, course, class, year_of_passing, password_hash FROM students WHERE upid = ?");
+    $check_stmt->bind_param("s", $upid);
     $check_stmt->execute();
     $check_res = $check_stmt->get_result();
 
-    if ($check_res->num_rows > 0) {
-        $_SESSION['error'] = "A student with this UPID, Register Number, or Email already exists.";
+    if ($check_res->num_rows === 0) {
+        $_SESSION['error'] = "Your UPID is not found in the system. Please contact the administrator.";
+        header("Location: student_register.php");
+        exit;
+    }
+
+    $existing_student = $check_res->fetch_assoc();
+
+    // Check if student has already registered (password set)
+    if (!empty($existing_student['password_hash'])) {
+        $_SESSION['error'] = "You have already registered. Please login instead.";
+        header("Location: student_login.php");
+        exit;
+    }
+
+    // Verify register number matches
+    if ($existing_student['reg_no'] !== $reg_no) {
+        $_SESSION['error'] = "Register number does not match our records for this UPID.";
         header("Location: student_register.php");
         exit;
     }
@@ -57,9 +67,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['register'])) {
     // Hash password
     $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
-    // Insert student
-    $stmt = $conn->prepare("INSERT INTO students (upid, reg_no, student_name, email, phone_no, program_type, program, course, class, year_of_passing, password_hash, placed_status, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'not_placed', 1, NOW())");
-    $stmt->bind_param("sssssssssss", $upid, $reg_no, $student_name, $email, $phone_no, $program_type, $program, $course, $class, $year_of_passing, $password_hash);
+    // Update existing student record with password and allow updating contact details
+    $stmt = $conn->prepare("UPDATE students SET student_name = ?, email = ?, phone_no = ?, password_hash = ?, is_active = 1, created_at = NOW() WHERE student_id = ?");
+    $stmt->bind_param("ssssi", $student_name, $email, $phone_no, $password_hash, $existing_student['student_id']);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = "Registration successful! Please login.";
@@ -69,20 +79,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['register'])) {
         $_SESSION['error'] = "Registration failed. Please try again.";
         header("Location: student_register.php");
         exit;
-    }
-}
-
-// Flatten all courses for dropdown
-$allUG = [];
-foreach ($ug_courses_grouped as $group) {
-    foreach ($group as $programs) {
-        $allUG = array_merge($allUG, $programs);
-    }
-}
-$allPG = [];
-foreach ($pg_courses_grouped as $group) {
-    foreach ($group as $programs) {
-        $allPG = array_merge($allPG, $programs);
     }
 }
 ?>
@@ -320,47 +316,6 @@ button[type="submit"]:hover {
 
           <div class="form-row">
             <div class="form-group">
-              <label for="program_type">Program Type *</label>
-              <select id="program_type" name="program_type" required onchange="updateProgramOptions()">
-                <option value="">Select Program Type</option>
-                <option value="UG">UG (Undergraduate)</option>
-                <option value="PG">PG (Postgraduate)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="program">Program *</label>
-              <select id="program" name="program" required onchange="updateCourseOptions()">
-                <option value="">Select Program</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="course">Course *</label>
-              <select id="course" name="course" required>
-                <option value="">Select Course</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="class">Class/Year *</label>
-              <select id="class" name="class" required>
-                <option value="">Select Year</option>
-                <option value="First Year">First Year</option>
-                <option value="Second Year">Second Year</option>
-                <option value="Third Year">Third Year</option>
-                <option value="Fourth Year">Fourth Year</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="year_of_passing">Year of Passing *</label>
-            <input type="number" id="year_of_passing" name="year_of_passing" placeholder="e.g., 2025" min="2020" max="2030" required>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
               <label for="password">Password *</label>
               <div class="password-wrapper">
                 <input type="password" id="password" name="password" placeholder="At least 6 characters" required>
@@ -380,6 +335,10 @@ button[type="submit"]:hover {
             </div>
           </div>
 
+          <p style="text-align: center; color: #666; font-size: 13px; margin-top: 15px;">
+            Your program and course details will be automatically fetched from the admin records.
+          </p>
+
           <button type="submit" name="register">Register</button>
 
           <div class="links">
@@ -391,72 +350,6 @@ button[type="submit"]:hover {
   </div>
 
   <script>
-  const courseData = <?= json_encode([
-    'UG' => [
-      'BCA' => ['Bachelor of Computer Applications'],
-      'B.COM' => ['BCom-General', 'BCom-Professional', 'BCom-Corporate Finance', 'BCom-International Accounting and Finance'],
-      'BBA' => ['BBA-Regular', 'BBA-Business Analytics', 'BBA-Branding & Advertising'],
-      'BSc' => ['BSc-Computer Science_Mathematics', 'BSc-Data Science', 'BSc-Biotechnology'],
-      'BA' => ['BA-Psychology', 'BA-Economics', 'BA-Journalism & Mass Communication'],
-      'All UG' => $allUG
-    ],
-    'PG' => [
-      'MBA' => ['Master of Business Administration'],
-      'MCA' => ['Master of Computer Applications'],
-      'M.COM' => ['MCom-General', 'MCom-Financial Analysis', 'MCom-International Business'],
-      'MA' => ['MA-Economics', 'MA-English', 'MA-Public Policy'],
-      'MSc' => ['MSc-Computer Science (Data Science Specialization)', 'MSc-Biotechnology', 'MSc-Psychology'],
-      'All PG' => $allPG
-    ]
-  ]) ?>;
-
-  function updateProgramOptions() {
-    const programType = document.getElementById('program_type').value;
-    const programSelect = document.getElementById('program');
-    const courseSelect = document.getElementById('course');
-
-    programSelect.innerHTML = '<option value="">Select Program</option>';
-    courseSelect.innerHTML = '<option value="">Select Course</option>';
-
-    if (programType && courseData[programType]) {
-      Object.keys(courseData[programType]).forEach(prog => {
-        const option = document.createElement('option');
-        option.value = prog;
-        option.textContent = prog;
-        programSelect.appendChild(option);
-      });
-    }
-  }
-
-  function updateCourseOptions() {
-    const programType = document.getElementById('program_type').value;
-    const program = document.getElementById('program').value;
-    const courseSelect = document.getElementById('course');
-
-    courseSelect.innerHTML = '<option value="">Select Course</option>';
-
-    if (programType && program && courseData[programType][program]) {
-      const courses = courseData[programType][program];
-
-      // Handle nested structure
-      if (typeof courses === 'object' && !Array.isArray(courses)) {
-        Object.values(courses).flat().forEach(course => {
-          const option = document.createElement('option');
-          option.value = course;
-          option.textContent = course;
-          courseSelect.appendChild(option);
-        });
-      } else {
-        courses.forEach(course => {
-          const option = document.createElement('option');
-          option.value = course;
-          option.textContent = course;
-          courseSelect.appendChild(option);
-        });
-      }
-    }
-  }
-
   function togglePassword(inputId, element) {
     const input = document.getElementById(inputId);
     const toggleText = element.querySelector('.toggle-text');

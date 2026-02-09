@@ -253,7 +253,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_filter']) && $_P
     }
 
     $sql = "SELECT ps.* FROM placed_students ps
-            WHERE (ps.offer_type != 'Internship' OR ps.offer_type IS NULL)";
+            INNER JOIN students s ON ps.student_id = s.student_id
+            WHERE s.vantage_placed = 'yes'";
     if (!empty($where)) {
         $sql .= " AND " . implode(" AND ", $where);
     }
@@ -305,8 +306,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_filter']) && $_P
 <body>
   <!-- Heading Section -->
 <div class="heading-container">
-  <h2 class="headings">Placed Students</h2>
-  <p style="margin-bottom: 10px;">View the complete list of placed students with placement information.</p>
+  <h2 class="headings">Vantage Placed Students</h2>
+  <p style="margin-bottom: 10px;">View the complete list of vantage placed students with placement information.</p>
 </div>
 
 <!-- TOP Bar -->
@@ -319,36 +320,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_filter']) && $_P
       <i class="fas fa-filter"></i> Filters
     </button>
 
-    <a href="placed_students" class="reset-button">
+    <a href="vantage_placed_students" class="reset-button">
       <i class="fa fa-undo" aria-hidden="true"></i> <span>Reset</span>
     </a>
   </div>
 
   <!-- RIGHT CONTROLS -->
   <div class="right-controls">
-    <div class="export-import-container">
-      <button type="button" id="openImportPopup" class="import-button">
-        <i class="fa fa-download" aria-hidden="true" style="margin-right: 5px;"></i> Import File
-      </button>
-      <button type="button" id="exportBtn">
-        <i class="fas fa-file-export"></i> Export File
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Import Popup Modal -->
-<div id="ipt_importPopup" class="ipt_modal">
-  <div class="ipt_modal-content">
-    <span class="ipt_close-btn">&times;</span>
-    <h5>Select Import Option</h5>
-
-    <form method="POST" enctype="multipart/form-data" class="import-form">
-      <label for="csv_file_placed" class="ipt_import-option">
-        <i class="fa fa-download"></i> Import Excel File
-      </label>
-      <input type="file" id="csv_file_placed" name="csv_file_placed" accept=".csv,.xls,.xlsx" required style="display:none;" onchange="this.form.submit()">
-    </form>
+    <button type="button" id="exportBtn">
+      <i class="fas fa-file-export"></i> Export File
+    </button>
   </div>
 </div>
 
@@ -585,7 +566,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_filter']) && $_P
     </thead>
     <tbody id="tableBody">
       <?php
-      $defaultQuery = $conn->query("SELECT * FROM placed_students ORDER BY place_id DESC");
+      $defaultQuery = $conn->query("SELECT ps.* FROM placed_students ps INNER JOIN students s ON ps.student_id = s.student_id WHERE s.vantage_placed = 'yes' ORDER BY ps.place_id DESC");
       $sl_no = 1;
       while ($row = $defaultQuery->fetch_assoc()) {
           echo render_student_row($row, $sl_no++);
@@ -622,34 +603,6 @@ document.addEventListener("DOMContentLoaded", () => {
       filterModal.style.display = "none";
     }
   });
-
-  // Import popup modal handling
-  const openPopup = document.getElementById("openImportPopup");
-  const popup = document.getElementById("ipt_importPopup");
-  const closePopup = document.querySelector(".ipt_close-btn");
-
-  // Open import modal
-  openPopup?.addEventListener("click", (e) => {
-    e.stopPropagation();
-    popup.style.display = "flex";
-  });
-
-  // Close import modal when clicking outside
-  window.addEventListener("click", (e) => {
-    if (e.target === popup) {
-      popup.style.display = "none";
-    }
-  });
-
-  // Close import modal on X click
-  closePopup?.addEventListener("click", () => {
-    popup.style.display = "none";
-  });
-
-  // Trigger file input when clicking the label
-  document.querySelector('label[for="csv_file_placed"]')?.addEventListener("click", () => {
-    document.getElementById("csv_file_placed").click();
-  });
 });
 
 //clear filters
@@ -681,7 +634,7 @@ function applyFilters() {
   const formData = new FormData(form);
   formData.append("ajax_filter", "1");
 
-  fetch("placed_students", {
+  fetch("vantage_placed_students", {
     method: "POST",
     body: formData
   })
@@ -899,7 +852,7 @@ function applyBulkUpdate() {
   if (joiningReason) data.joining_reason = joiningReason;
 
 
-  fetch("placed_students", {
+  fetch("vantage_placed_students", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
@@ -920,7 +873,7 @@ function applyBulkUpdate() {
         document.getElementById("bulk_joining_reason").value = "";
 
         const promises = selectedIds.map(id => {
-          return fetch(`placed_students?ajax_row=1&place_id=${encodeURIComponent(id)}&t=${Date.now()}`)
+          return fetch(`vantage_placed_students?ajax_row=1&place_id=${encodeURIComponent(id)}&t=${Date.now()}`)
             .then(r => r.ok ? r.text() : Promise.reject(new Error("Failed to fetch updated row.")))
             .then(html => ({ id, html }));
         });
@@ -977,7 +930,7 @@ function attachRowSaveEvent() {
         edit_stipend: edit_stipend
       };
 
-      fetch("placed_students", {
+      fetch("vantage_placed_students", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
@@ -987,7 +940,7 @@ function attachRowSaveEvent() {
         showGlobalMessage(response.message, response.success);
 
         if (response.success) {
-          fetch(`placed_students?ajax_row=1&place_id=${encodeURIComponent(placeId)}&t=${Date.now()}`)
+          fetch(`vantage_placed_students?ajax_row=1&place_id=${encodeURIComponent(placeId)}&t=${Date.now()}`)
             .then(r => r.text())
             .then(html => {
               const temp = document.createElement("tbody");

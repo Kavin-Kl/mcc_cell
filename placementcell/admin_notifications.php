@@ -226,32 +226,59 @@ $(document).ready(function() {
         const notificationId = $(this).data('id');
         const notificationItem = $(this).closest('.notification-item');
 
-        $.post('admin_notifications.php', {
-            action: 'mark_read',
-            notification_id: notificationId
-        }, function(response) {
-            if (response.success) {
-                notificationItem.removeClass('notification-unread');
-                notificationItem.find('h6').addClass('text-muted');
-                notificationItem.find('p').addClass('text-muted');
-                notificationItem.find('.badge.bg-primary').remove();
-                notificationItem.find('.mark-read-btn').remove();
-                updateNotificationCount();
+        $.ajax({
+            url: 'admin_notifications.php',
+            method: 'POST',
+            data: {
+                action: 'mark_read',
+                notification_id: notificationId
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    notificationItem.removeClass('notification-unread');
+                    notificationItem.find('h6').addClass('text-muted');
+                    notificationItem.find('p').addClass('text-muted');
+                    notificationItem.find('.badge.bg-primary').remove();
+                    notificationItem.find('.mark-read-btn').remove();
+                    updateNotificationCount();
+                    location.reload();
+                } else {
+                    alert('Failed to mark notification as read: ' + (response.error || 'Unknown error'));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                console.error('Response:', xhr.responseText);
+                alert('Failed to mark notification as read. Please try again.');
             }
-        }, 'json');
+        });
     });
 
     // Mark all as read
     $('#markAllReadBtn').on('click', function(e) {
         e.preventDefault();
 
-        $.post('admin_notifications.php', {
-            action: 'mark_all_read'
-        }, function(response) {
-            if (response.success) {
-                location.reload();
+        $.ajax({
+            url: 'admin_notifications.php',
+            method: 'POST',
+            data: {
+                action: 'mark_all_read'
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert('Failed to mark all notifications as read: ' + (response.error || 'Unknown error'));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                console.error('Response:', xhr.responseText);
+                alert('Failed to mark all notifications as read. Please try again.');
             }
-        }, 'json');
+        });
     });
 
     // Delete notification
@@ -265,30 +292,53 @@ $(document).ready(function() {
         const notificationId = $(this).data('id');
         const notificationItem = $(this).closest('.notification-item');
 
-        $.post('admin_notifications.php', {
-            action: 'delete',
-            notification_id: notificationId
-        }, function(response) {
-            if (response.success) {
-                notificationItem.fadeOut(300, function() {
-                    $(this).remove();
-                    updateNotificationCount();
-                });
+        $.ajax({
+            url: 'admin_notifications.php',
+            method: 'POST',
+            data: {
+                action: 'delete',
+                notification_id: notificationId
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    notificationItem.fadeOut(300, function() {
+                        $(this).remove();
+                        updateNotificationCount();
+                        location.reload();
+                    });
+                } else {
+                    alert('Failed to delete notification: ' + (response.error || 'Unknown error'));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', error);
+                console.error('Response:', xhr.responseText);
+                alert('Failed to delete notification. Please try again.');
             }
-        }, 'json');
+        });
     });
 
     function updateNotificationCount() {
-        $.post('admin_notifications.php', {
-            action: 'get_count'
-        }, function(response) {
-            const count = response.count;
-            if (count > 0) {
-                $('.notification-badge').text(count).show();
-            } else {
-                $('.notification-badge').hide();
+        $.ajax({
+            url: 'admin_notifications.php',
+            method: 'POST',
+            data: {
+                action: 'get_count'
+            },
+            dataType: 'json',
+            success: function(response) {
+                const count = response.count;
+                if (count > 0) {
+                    $('.notification-badge').text(count).show();
+                } else {
+                    $('.notification-badge').hide();
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Failed to update notification count:', error);
             }
-        }, 'json');
+        });
     }
 });
 </script>

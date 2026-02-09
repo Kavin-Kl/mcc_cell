@@ -734,7 +734,7 @@ font-size: 14px;
       <div class="role-content" id="role-content-${roleId}" style="display: block; padding: 10px;">
 
 
-        <label>Designation Name: <span style="color: red;">*</span></label>
+        <label>Designation: <span style="color: red;">*</span></label>
         <input type="text" name="role_name[]" required>
 
 
@@ -1592,14 +1592,14 @@ function validateDriveForm() {
   for (const block of roleBlocks) {
     const roleNameInput = block.querySelector('input[name="role_name[]"]');
     if (!roleNameInput || roleNameInput.value.trim() === '') {
-      alert('Please fill in the Designation Name for each Role.');
+      alert('Please fill in the Designation for each Role.');
       roleNameInput?.focus();
       return false;
     }
 
     const roleName = roleNameInput.value.trim().toLowerCase();
     if (roleNames.has(roleName)) {
-      alert(`Duplicate Designation Name detected: "${roleNameInput.value}". Each role must have a unique name.`);
+      alert(`Duplicate Designation detected: "${roleNameInput.value}". Each role must have a unique name.`);
       roleNameInput.focus();
       return false;
     }

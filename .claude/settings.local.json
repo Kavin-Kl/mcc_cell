@@ -2,7 +2,24 @@
   "permissions": {
     "allow": [
       "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"DESCRIBE drive_roles;\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SHOW FULL TABLES WHERE Table_type = ''VIEW'';\")"
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SHOW FULL TABLES WHERE Table_type = ''VIEW'';\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SHOW TABLES;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"DESCRIBE students;\")",
+      "Bash(findstr:*)",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SHOW COLUMNS FROM students;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"DESCRIBE placed_students;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"DESCRIBE drive_data;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SHOW COLUMNS FROM students LIKE ''%vantage%'';\")",
+      "Bash(dir \"C:\\xampp\\htdocs\" /b)",
+      "Bash(dir C:xampphtdocsplacementcell /b)",
+      "Bash(copy \"C:\\Users\\Kavin\\Downloads\\placementcell041225\\placementcell\\header.php\" \"C:\\xampp\\htdocs\\placementcell\\header.php\")",
+      "Bash(copy \"C:\\Users\\Kavin\\Downloads\\placementcell041225\\placementcell\\registered_students.php\" \"C:\\xampp\\htdocs\\placementcell\\registered_students.php\")",
+      "Bash(copy \"C:\\Users\\Kavin\\Downloads\\placementcell041225\\placementcell\\placed_students.php\" \"C:\\xampp\\htdocs\\placementcell\\placed_students.php\")",
+      "Bash(copy \"C:\\Users\\Kavin\\Downloads\\placementcell041225\\placementcell\\admin_notifications.php\" \"C:\\xampp\\htdocs\\placementcell\\admin_notifications.php\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"DESCRIBE drives;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\":*)",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SELECT DISTINCT batch, year_of_passing FROM students LIMIT 10;\")",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

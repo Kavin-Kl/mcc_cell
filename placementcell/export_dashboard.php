@@ -400,7 +400,7 @@ $share_data .= "--------------------\n";
 foreach ($roles_data as $index => $role) {
     $share_data .= "ROLE " . ($index + 1) . ":\n";
     if (!empty($role['designation_name'])) {
-        $share_data .= "- Designation Name: " . $role['designation_name'] . "\n";
+        $share_data .= "- Designation: " . $role['designation_name'] . "\n";
     }
     if (!empty($role['ctc'])) {
         $share_data .= "- CTC: ₹" . $role['ctc'] . "\n";

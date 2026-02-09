@@ -140,7 +140,6 @@ function build_filters(&$types, &$params) {
 
     // ---------- Offer Type filter (special handling for computed field) ----------
     if (!empty($_POST['offer_type'])) {
-        // Filter by offer_type from drive_data via the JOIN
         $where[] = "dd.offer_type = ?";
         $params[] = $_POST['offer_type'];
         $types .= "s";
@@ -233,6 +232,7 @@ function fetch_students($conn, $where, $types, $params, $limit = 50, $offset = 0
 
       -- Dynamic WHERE clause if filters exist
       WHERE 1=1
+        AND s.vantage_participant = 'yes'
     ";
 
     if (!empty($where)) {
@@ -484,7 +484,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["csv_file"])) {
     } else {
         $_SESSION['import_message'] = "Filename must include batch year in format YYYY-YYYY (e.g., students_2023-2026).";
         $_SESSION['import_status'] = "error";
-        header("Location: registered_students");
+        header("Location: vantage_registered_students");
         exit;
     }
 
@@ -492,7 +492,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["csv_file"])) {
     if (!in_array($fileExt, $allowedTypes)) {
         $_SESSION['import_message'] = "Invalid file type. Only .CSV, .XLS and .XLSX are allowed.";
         $_SESSION['import_status'] = "error";
-        header("Location: registered_students");
+        header("Location: vantage_registered_students");
         exit;
     }
 
@@ -578,7 +578,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["csv_file"])) {
 
             $_SESSION['import_message'] = "Missing required column(s): " . implode(', ', $readableNames);
             $_SESSION['import_status'] = "error";
-            header("Location: registered_students.php");
+            header("Location: vantage_registered_students.php");
             exit;
         }
 
@@ -645,7 +645,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["csv_file"])) {
         $_SESSION['import_status'] = "error";
     }
 
-    header("Location: registered_students");
+    header("Location: vantage_registered_students");
     exit;
 }
 
@@ -717,7 +717,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['export_all'])) {
 
     // Send proper headers before output
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header('Content-Disposition: attachment;filename="registered_students.xlsx"');
+    header('Content-Disposition: attachment;filename="vantage_registered_students.xlsx"');
     header('Cache-Control: max-age=0');
     header('Expires: 0');
     header('Pragma: public');
@@ -882,7 +882,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
   <?php include 'header.php'; ?>
     <div class="heading-container">
-      <h3 class="headings">Placement Registered Students</h3>
+      <h3 class="headings">Vantage Registered Students</h3>
       <p>View the complete list of registered students with placement information.</p>
     </div>
     <div class="top-bar">
@@ -892,7 +892,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
           <button type="button" id="filter-button" class="filter-button">
             <i class="fas fa-filter"></i> Filters
           </button>
-          <a href="registered_students" class="reset-button">
+          <a href="vantage_registered_students" class="reset-button">
             <i class="fas fa-rotate-left"></i> Reset
           </a>
 
@@ -1203,7 +1203,7 @@ function applyFilters(searchQuery = "") {
     formData.append("search_query", searchQuery.trim());
   }
 
-  fetch("registered_students", {
+  fetch("vantage_registered_students", {
     method: "POST",
     body: formData
   })
@@ -1355,14 +1355,14 @@ document.getElementById("exportForm").addEventListener("submit", function(e) {
 
     // Send POST to trigger PHP export
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", "registered_students", true);
+    xhr.open("POST", "vantage_registered_students", true);
     xhr.responseType = "blob";
     xhr.onload = function() {
         if (this.status === 200) {
             const blob = this.response;
             const link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
-            link.download = "registered_students.xlsx";
+            link.download = "vantage_registered_students.xlsx";
             link.click();
             closeExportModal();
         }
@@ -1679,7 +1679,7 @@ function loadMoreStudents(reset = false) {
     formData.append("search_query", searchQuery);
   }
 
-  fetch("registered_students", {
+  fetch("vantage_registered_students", {
     method: "POST",
     body: formData
   })

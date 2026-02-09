@@ -475,6 +475,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 
         
+        // Check if this drive has any internship roles
+        $hasInternshipRole = false;
+        foreach ($roles as $r) {
+            if (isset($r['offer_type']) && strtolower($r['offer_type']) === 'internship') {
+                $hasInternshipRole = true;
+                break;
+            }
+        }
+
         // Validate Regno
 if (strcasecmp(trim($student['reg_no']), trim($regno)) !== 0) {
     $errorRegno = "Register No does not match with Placement ID.";
@@ -482,11 +491,13 @@ if (strcasecmp(trim($student['reg_no']), trim($regno)) !== 0) {
 
 elseif (strtolower($student['placed_status']) === "blocked") {
     $errorRegno = "You are blocked and not eligible.";
-} elseif (strtolower($student['placed_status']) === "placed" && strtolower($student['allow_reapply']) !== "yes") {
+}
+// Only check placement status for full-time roles, not internships
+elseif (!$hasInternshipRole && strtolower($student['placed_status']) === "placed" && strtolower($student['allow_reapply']) !== "yes") {
     $errorRegno = "You are already placed and not eligible.";
 }
-// 🚫 Check if already placed off-campus
-elseif (isset($student['Offcampus_selection']) && strtolower(trim($student['Offcampus_selection'])) === 'placed') {
+// 🚫 Check if already placed off-campus (only for full-time, not internships)
+elseif (!$hasInternshipRole && isset($student['Offcampus_selection']) && strtolower(trim($student['Offcampus_selection'])) === 'placed') {
     $errorRegno = "You are already placed off campus and cannot apply.";
 }
 
@@ -961,7 +972,7 @@ input[type="submit"]:hover {
         <?php foreach ($eligibleRoles as $index => $role): ?>
             <p><strong>ROLE <?= $index + 1 ?>:</strong></p>
             <ul>
-                <li><strong>Designation Name:</strong> <?= htmlspecialchars($role['designation_name']) ?></li>
+                <li><strong>Designation:</strong> <?= htmlspecialchars($role['designation_name']) ?></li>
                 <?php if (!empty($role['ctc'])): ?>
                     <li><strong>CTC:</strong> <?= htmlspecialchars($role['ctc']) ?></li>
                 <?php endif; ?>

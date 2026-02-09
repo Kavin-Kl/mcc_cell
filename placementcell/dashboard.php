@@ -650,7 +650,7 @@ JOB ROLES:
 ROLE <?= $index + 1 ?>:
 <?php 
 $role_fields = [];
-        if (!empty($role['designation_name'])) $role_fields[] = "- *Designation Name: " . htmlspecialchars($role['designation_name']). "*";
+        if (!empty($role['designation_name'])) $role_fields[] = "- *Designation: " . htmlspecialchars($role['designation_name']). "*";
         if (!empty($role['ctc'])) $role_fields[] = "- *CTC:₹ " . htmlspecialchars($role['ctc']). "*";
         if (!empty($role['stipend'])) $role_fields[] = "- *Stipend:₹ " . htmlspecialchars($role['stipend']). "*";
         if (!empty($role['work_timings'])) $role_fields[] = "- *Work Timings: " . htmlspecialchars($role['work_timings']). "*";
