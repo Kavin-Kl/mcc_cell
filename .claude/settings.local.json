@@ -1,25 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"DESCRIBE drive_roles;\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SHOW FULL TABLES WHERE Table_type = ''VIEW'';\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SHOW TABLES;\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"DESCRIBE students;\")",
-      "Bash(findstr:*)",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SHOW COLUMNS FROM students;\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"DESCRIBE placed_students;\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"DESCRIBE drive_data;\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SHOW COLUMNS FROM students LIKE ''%vantage%'';\")",
-      "Bash(dir \"C:\\xampp\\htdocs\" /b)",
-      "Bash(dir C:xampphtdocsplacementcell /b)",
-      "Bash(copy \"C:\\Users\\Kavin\\Downloads\\placementcell041225\\placementcell\\header.php\" \"C:\\xampp\\htdocs\\placementcell\\header.php\")",
-      "Bash(copy \"C:\\Users\\Kavin\\Downloads\\placementcell041225\\placementcell\\registered_students.php\" \"C:\\xampp\\htdocs\\placementcell\\registered_students.php\")",
-      "Bash(copy \"C:\\Users\\Kavin\\Downloads\\placementcell041225\\placementcell\\placed_students.php\" \"C:\\xampp\\htdocs\\placementcell\\placed_students.php\")",
-      "Bash(copy \"C:\\Users\\Kavin\\Downloads\\placementcell041225\\placementcell\\admin_notifications.php\" \"C:\\xampp\\htdocs\\placementcell\\admin_notifications.php\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"DESCRIBE drives;\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\":*)",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SELECT DISTINCT batch, year_of_passing FROM students LIMIT 10;\")",
-      "Bash(dir:*)"
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SELECT course_name FROM courses WHERE course_name LIKE ''%economics%'' OR course_name LIKE ''%statistics%'' OR course_name LIKE ''%bcom%'' LIMIT 10;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"DESCRIBE applications;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SELECT COUNT(*) as total_students FROM students; SELECT COUNT(*) as total_drives FROM drives; SELECT COUNT(*) as total_applications FROM applications; SELECT COUNT(*) as total_placed_students FROM placed_students;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SELECT upid, student_name, email, course, batch FROM students LIMIT 5;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SELECT company_name, drive_no, open_date FROM drives LIMIT 5;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SELECT s.student_name, d.company_name, ps.role, ps.ctc FROM placed_students ps JOIN students s ON ps.student_id = s.student_id JOIN drives d ON ps.drive_id = d.drive_id LIMIT 5;\")"
     ],
     "deny": [],
     "ask": []
