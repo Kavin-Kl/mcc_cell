@@ -628,6 +628,15 @@ ul, ol {
                 <span class="tooltip">Add Drive</span>
             </li>
 
+            <!-- Manage Round Results (alias to Company Progress Tracker) -->
+            <li>
+                <a href="course_specific_drive_data.php" class="<?= $currentPage === 'course_specific_drive_data.php' ? 'active' : '' ?>">
+                    <i class="bi bi-list-check"></i>
+                    <span class="links_name">Manage Round Results</span>
+                </a>
+                <span class="tooltip">Manage Round Results</span>
+            </li>
+
             <li>
                 <a href="enrolled_students.php" class="<?= $currentPage === 'enrolled_students.php' ? 'active' : '' ?>">
                     <i class="bi bi-card-list"></i>

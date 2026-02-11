@@ -204,8 +204,10 @@ while ($drive = $drives_result->fetch_assoc()) {
         continue;
     }
 }
-    include_once __DIR__ . '/sync_placed_students.php';
-    sync_placed_students($conn);
+// NOTE: Automatic sync of placed_students from applications was removed
+// here because it was wiping rows imported from the backup/Excel.
+// If you ever want to run sync_placed_students($conn), do it from a
+// separate maintenance script instead of on every dashboard load.
 // Top Dashboard Boxes
 $total_students = $conn->query("SELECT COUNT(*) AS count FROM students")->fetch_assoc()['count'];
 $total_companies = $conn->query("SELECT COUNT(DISTINCT company_name) AS count FROM drives")->fetch_assoc()['count'];
