@@ -3,7 +3,8 @@
     "allow": [
       "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\":*)",
       "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"SELECT COUNT(*) as total FROM placed_students; SELECT upid, student_name, company_name FROM placed_students LIMIT 3;\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"SELECT COUNT(*) as total FROM placed_students; SELECT upid, student_name, company_name FROM placed_students LIMIT 5;\")"
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"SELECT COUNT(*) as total FROM placed_students; SELECT upid, student_name, company_name FROM placed_students LIMIT 5;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"DESCRIBE placed_students;\")"
     ],
     "deny": [],
     "ask": []
