@@ -474,6 +474,25 @@ if (!empty($_SESSION['import_message'])) {
 // === Handle CSV Import ===
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["csv_file"])) {
     $file = $_FILES["csv_file"];
+
+    // Check for upload errors
+    if ($file["error"] !== UPLOAD_ERR_OK) {
+        $uploadErrors = [
+            UPLOAD_ERR_INI_SIZE => 'File exceeds upload_max_filesize in php.ini',
+            UPLOAD_ERR_FORM_SIZE => 'File exceeds MAX_FILE_SIZE in HTML form',
+            UPLOAD_ERR_PARTIAL => 'File was only partially uploaded',
+            UPLOAD_ERR_NO_FILE => 'No file was uploaded',
+            UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder',
+            UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
+            UPLOAD_ERR_EXTENSION => 'File upload stopped by PHP extension'
+        ];
+        $errorMsg = $uploadErrors[$file["error"]] ?? 'Unknown upload error';
+        $_SESSION['import_message'] = "Upload failed: " . $errorMsg;
+        $_SESSION['import_status'] = "error";
+        header("Location: vantage_registered_students.php");
+        exit;
+    }
+
     $fileName = $file["name"];
     $tmpPath = $file["tmp_name"];
     $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
@@ -484,7 +503,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["csv_file"])) {
     } else {
         $_SESSION['import_message'] = "Filename must include batch year in format YYYY-YYYY (e.g., students_2023-2026).";
         $_SESSION['import_status'] = "error";
-        header("Location: vantage_registered_students");
+        header("Location: vantage_registered_students.php");
         exit;
     }
 
@@ -492,7 +511,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["csv_file"])) {
     if (!in_array($fileExt, $allowedTypes)) {
         $_SESSION['import_message'] = "Invalid file type. Only .CSV, .XLS and .XLSX are allowed.";
         $_SESSION['import_status'] = "error";
-        header("Location: vantage_registered_students");
+        header("Location: vantage_registered_students.php");
         exit;
     }
 
@@ -507,13 +526,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["csv_file"])) {
                     $dataRows[] = $row;
                 }
                 fclose($handle);
+            } else {
+                throw new Exception("Could not open CSV file for reading.");
             }
         } else {
-            $spreadsheet = IOFactory::load($tmpPath);
-            $worksheet = $spreadsheet->getActiveSheet();
-            $rows = $worksheet->toArray();
-            $header = array_shift($rows);
-            $dataRows = $rows;
+            // Load Excel file
+            try {
+                $spreadsheet = IOFactory::load($tmpPath);
+                $worksheet = $spreadsheet->getActiveSheet();
+                $rows = $worksheet->toArray();
+                $header = array_shift($rows);
+                $dataRows = $rows;
+            } catch (Exception $e) {
+                throw new Exception("Error reading Excel file: " . $e->getMessage());
+            }
         }
 
         // Map headers to internal field names
@@ -645,7 +671,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["csv_file"])) {
         $_SESSION['import_status'] = "error";
     }
 
-    header("Location: vantage_registered_students");
+    header("Location: vantage_registered_students.php");
     exit;
 }
 
@@ -1384,16 +1410,12 @@ function validateAndSubmit() {
     const pattern = /\d{4}-\d{4}/; // Matches "2022-2024"
 
     if (!pattern.test(filename)) {
-    // Use a hidden form to trigger server-side error handling
-    const form = input.form;
-    const messageField = document.createElement("input");
-    messageField.type = "hidden";
-    messageField.name = "invalid_filename";
-    messageField.value = "1";
-    form.appendChild(messageField);
-    form.submit();
-    return false;
-  }
+      alert("Filename must include batch year in format YYYY-YYYY (e.g., students_2023-2026.xlsx)");
+      input.value = ""; // Clear the file input
+      return false;
+    }
+
+    // Valid filename, submit the form
     input.form.submit();
   }
 
