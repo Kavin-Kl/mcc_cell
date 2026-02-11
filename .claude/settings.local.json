@@ -2,12 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\":*)",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"SELECT place_id, student_id, upid, student_name, company_name, role FROM placed_students LIMIT 5;\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"SELECT COUNT(*) as count, COUNT(upid) as upid_count, COUNT(student_name) as name_count FROM placed_students;\" --connect-timeout=10)",
-      "Bash(python:*)",
-      "Bash(findstr:*)",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"SELECT COUNT(*) as total FROM placed_students;\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"SELECT COUNT(*) as students FROM students; SELECT COUNT(*) as drives FROM drives; SELECT COUNT(*) as drive_roles FROM drive_roles;\")"
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"SELECT COUNT(*) as total FROM placed_students; SELECT upid, student_name, company_name FROM placed_students LIMIT 3;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"SELECT COUNT(*) as total FROM placed_students; SELECT upid, student_name, company_name FROM placed_students LIMIT 5;\")"
     ],
     "deny": [],
     "ask": []
