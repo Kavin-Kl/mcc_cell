@@ -39,9 +39,14 @@
       "Bash(find:*)",
       "Bash(\"C:\\xampp\\mysql\\bin\\mysqldump.exe\":*)",
       "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 -e \"DROP DATABASE IF EXISTS admin_placement_db; CREATE DATABASE admin_placement_db;\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"SET FOREIGN_KEY_CHECKS=0; DROP TABLE IF EXISTS admin_notifications, admin_users, application_rounds, applications, courses, deadline_notifications_sent, drive_data, drive_roles, drives, form_links, on_off_campus_students, password_resets, placed_students, student_notifications, student_password_resets, students; SET FOREIGN_KEY_CHECKS=1;\")"
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"SET FOREIGN_KEY_CHECKS=0; DROP TABLE IF EXISTS admin_notifications, admin_users, application_rounds, applications, courses, deadline_notifications_sent, drive_data, drive_roles, drives, form_links, on_off_campus_students, password_resets, placed_students, student_notifications, student_password_resets, students; SET FOREIGN_KEY_CHECKS=1;\")",
+      "Bash(dir:*)",
+      "Bash(python restore_placed_students.py:*)",
+      "Bash(python:*)",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"SELECT COUNT(*) as with_drive, COUNT(*) as total FROM placed_students WHERE drive_id IS NOT NULL; SELECT upid, company_name, role, offer_type, drive_id FROM placed_students LIMIT 3;\")"
     ],
     "deny": [],
     "ask": []
   }
+  "dangerouslySkipPermissions": true
 }
