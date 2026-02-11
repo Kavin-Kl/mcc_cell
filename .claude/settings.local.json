@@ -1,12 +1,19 @@
 {
   "permissions": {
     "allow": [
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SELECT course_name FROM courses WHERE course_name LIKE ''%economics%'' OR course_name LIKE ''%statistics%'' OR course_name LIKE ''%bcom%'' LIMIT 10;\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"DESCRIBE applications;\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SELECT COUNT(*) as total_students FROM students; SELECT COUNT(*) as total_drives FROM drives; SELECT COUNT(*) as total_applications FROM applications; SELECT COUNT(*) as total_placed_students FROM placed_students;\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SELECT upid, student_name, email, course, batch FROM students LIMIT 5;\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SELECT company_name, drive_no, open_date FROM drives LIMIT 5;\")",
-      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SELECT s.student_name, d.company_name, ps.role, ps.ctc FROM placed_students ps JOIN students s ON ps.student_id = s.student_id JOIN drives d ON ps.drive_id = d.drive_id LIMIT 5;\")"
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"DESCRIBE drive_data;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3307 -h localhost admin_placement_db -e \"SELECT COUNT(*) as count FROM drive_data;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\":*)",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -e \"SHOW DATABASES;\")",
+      "Bash(python generate_insert_sql.py:*)",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 -e \"SHOW DATABASES;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"DESCRIBE students;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"DESCRIBE on_off_campus_students;\")",
+      "Bash(python generate_insert_sql_v2.py:*)",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"DESCRIBE drive_data;\")",
+      "Bash(python:*)",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"SELECT COUNT(*) as student_count FROM students; SELECT COUNT(*) as drive_count FROM drives; SELECT COUNT(*) as app_count FROM applications;\")",
+      "Bash(\"C:\\xampp\\mysql\\bin\\mysql.exe\" -u root -P 3308 -h 127.0.0.1 admin_placement_db -e \"SELECT * FROM placed_students LIMIT 3;\")"
     ],
     "deny": [],
     "ask": []
