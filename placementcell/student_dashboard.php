@@ -29,11 +29,7 @@ $placed_count_stmt->bind_param("i", $student_id);
 $placed_count_stmt->execute();
 $placed_applications = $placed_count_stmt->get_result()->fetch_assoc()['total'];
 
-// Get pending applications
-$pending_count_stmt = $conn->prepare("SELECT COUNT(*) as total FROM applications WHERE student_id = ? AND status IN ('applied', 'pending')");
-$pending_count_stmt->bind_param("i", $student_id);
-$pending_count_stmt->execute();
-$pending_applications = $pending_count_stmt->get_result()->fetch_assoc()['total'];
+// Pending applications removed from dashboard as per requirement
 
 // Get active drives count
 $now = date('Y-m-d H:i:s');
@@ -79,7 +75,7 @@ $upcoming_drives = $conn->query($upcoming_drives_query);
 
     <!-- Stats Cards -->
     <div class="row g-3 mb-4">
-      <div class="col-md-3 col-sm-6">
+      <div class="col-md-4 col-sm-6">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
@@ -95,23 +91,7 @@ $upcoming_drives = $conn->query($upcoming_drives_query);
         </div>
       </div>
 
-      <div class="col-md-3 col-sm-6">
-        <div class="card border-0 shadow-sm h-100">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h6 class="text-muted mb-1">Pending Applications</h6>
-                <h2 class="mb-0"><?= $pending_applications ?></h2>
-              </div>
-              <div class="stat-icon bg-warning bg-opacity-10 p-3 rounded">
-                <i class="bx bx-time text-warning" style="font-size: 32px;"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-3 col-sm-6">
+      <div class="col-md-4 col-sm-6">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
@@ -127,7 +107,7 @@ $upcoming_drives = $conn->query($upcoming_drives_query);
         </div>
       </div>
 
-      <div class="col-md-3 col-sm-6">
+      <div class="col-md-4 col-sm-6">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">

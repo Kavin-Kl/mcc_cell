@@ -110,17 +110,20 @@ function sync_placed_students(mysqli $conn, array $opts = [])
                 $placeId = $checkResult->fetch_assoc()['place_id'];
 
                 $update = $conn->prepare("
-                    UPDATE placed_students 
-                    SET 
-                        drive_id = ?, 
-                        drive_no = ?, 
-                        role_id = ?, 
-                        company_name = ?, 
-                        role = ?, 
-                        ctc = ?, 
-                        stipend = ?, 
-                        offer_type = ?, 
-                        filled_on_off_form = ?, 
+                    UPDATE placed_students
+                    SET
+                        drive_id = ?,
+                        drive_no = ?,
+                        role_id = ?,
+                        program_type = ?,
+                        program = ?,
+                        course = ?,
+                        company_name = ?,
+                        role = ?,
+                        ctc = ?,
+                        stipend = ?,
+                        offer_type = ?,
+                        filled_on_off_form = ?,
                         percentage = ?
                     WHERE place_id = ?
                 ");
@@ -130,10 +133,13 @@ function sync_placed_students(mysqli $conn, array $opts = [])
                 $percentage = (float)$r['percentage'];
 
                 $update->bind_param(
-                    "isissssssdi",
+                    "isissssssssdi",
                     $r['drive_id'],
                     $r['drive_no'],
                     $r['role_id'],
+                    $r['program_type'],
+                    $r['program'],
+                    $r['course'],
                     $r['company_name'],
                     $r['role'],
                     $r['ctc'],

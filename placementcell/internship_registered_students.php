@@ -13,7 +13,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 $batches = $conn->query("SELECT DISTINCT batch FROM students ORDER BY batch DESC");
 $placedStatuses = $conn->query("SELECT DISTINCT placed_status FROM students ORDER BY placed_status ASC");
 $applications = $conn->query("
-    SELECT DISTINCT cnt.application_count 
+    SELECT DISTINCT cnt.application_count
 FROM (
     SELECT s.student_id,
         (
@@ -21,6 +21,7 @@ FROM (
             FROM applications a
             INNER JOIN drives d ON a.drive_id = d.drive_id
             WHERE a.student_id = s.student_id
+            AND a.status != 'pending'
         ) AS application_count
     FROM students s
 ) AS cnt
@@ -171,12 +172,13 @@ function fetch_students($conn, $where, $types, $params, $limit = 50, $offset = 0
       SELECT
           s.*,
 
-          -- Count of distinct applications
+          -- Count of distinct applications (excluding pending status)
           (
               SELECT COUNT(DISTINCT CONCAT(d.drive_no, '_', a.drive_id))
               FROM applications a
               INNER JOIN drives d ON a.drive_id = d.drive_id
               WHERE a.student_id = s.student_id
+              AND a.status != 'pending'
           ) AS application_count,
 
           -- Final status

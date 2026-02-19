@@ -172,12 +172,13 @@ function fetch_students($conn, $where, $types, $params, $limit = 50, $offset = 0
       SELECT
           s.*,
 
-          -- Count of distinct applications
+          -- Count of distinct applications (excluding pending status)
           (
               SELECT COUNT(DISTINCT CONCAT(d.drive_no, '_', a.drive_id))
               FROM applications a
               INNER JOIN drives d ON a.drive_id = d.drive_id
               WHERE a.student_id = s.student_id
+              AND a.status != 'pending'
           ) AS application_count,
 
           -- Final status
@@ -222,11 +223,11 @@ function fetch_students($conn, $where, $types, $params, $limit = 50, $offset = 0
           END AS offer_type
 
       FROM students s
-      LEFT JOIN ranked_applications ra 
+      LEFT JOIN ranked_applications ra
             ON s.student_id = ra.student_id AND ra.rn = 1
-      LEFT JOIN drives d 
+      LEFT JOIN drives d
             ON ra.drive_id = d.drive_id
-      LEFT JOIN drive_roles dr 
+      LEFT JOIN drive_roles dr
             ON ra.role_id = dr.role_id
       LEFT JOIN drive_data dd
             ON ra.drive_id = dd.drive_id AND ra.role_id = dd.role_id
@@ -240,15 +241,16 @@ function fetch_students($conn, $where, $types, $params, $limit = 50, $offset = 0
     }
 
     $sql .= "
-        ORDER BY 
-    s.batch DESC, 
-    CASE s.program_type 
-        WHEN 'UG' THEN 1 
-        WHEN 'PG' THEN 2 
-        ELSE 3 
+        GROUP BY s.student_id
+        ORDER BY
+    s.batch DESC,
+    CASE s.program_type
+        WHEN 'UG' THEN 1
+        WHEN 'PG' THEN 2
+        ELSE 3
     END,
     s.upid ASC
-        LIMIT ? OFFSET ?  
+        LIMIT ? OFFSET ?
     ";
 
     $stmt = $conn->prepare($sql);
@@ -667,6 +669,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["csv_file"])) {
         $_SESSION['import_status'] = "success";
 
     } catch (Exception $e) {
+        error_log("Import error: " . $e->getMessage() . " | File: " . $e->getFile() . " | Line: " . $e->getLine());
         $_SESSION['import_message'] = "Error during import: " . $e->getMessage();
         $_SESSION['import_status'] = "error";
     }
@@ -679,7 +682,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["csv_file"])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['export_all'])) {
     // Disable any output
     error_reporting(0);
-    ob_end_clean(); // clear any previous output buffer
+    if (ob_get_level()) ob_end_clean(); // clear any previous output buffer if exists
 
     require 'vendor/autoload.php';
 
@@ -1386,12 +1389,28 @@ document.getElementById("exportForm").addEventListener("submit", function(e) {
     xhr.onload = function() {
         if (this.status === 200) {
             const blob = this.response;
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = "registered_students.xlsx";
-            link.click();
-            closeExportModal();
+            // Check if response is actually a blob (not error HTML)
+            if (blob.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = "registered_students.xlsx";
+                link.click();
+                closeExportModal();
+            } else {
+                // Response is not Excel file, likely an error
+                const reader = new FileReader();
+                reader.onload = function() {
+                    console.error("Export error:", reader.result);
+                    alert("Export failed. Check browser console for details.");
+                };
+                reader.readAsText(blob);
+            }
+        } else {
+            alert("Export failed with status: " + this.status);
         }
+    };
+    xhr.onerror = function() {
+        alert("Export request failed. Please try again.");
     };
     xhr.send(formData);
 });
@@ -1402,21 +1421,37 @@ function closeExportModal() {
 
 // import excel sheets
 function validateAndSubmit() {
+    console.log("validateAndSubmit called");
     const input = document.getElementById("csv_file");
     const file = input.files[0];
-    if (!file) return;
 
+    if (!file) {
+      console.error("No file selected");
+      return;
+    }
+
+    console.log("File selected:", file.name, "Size:", file.size, "Type:", file.type);
     const filename = file.name;
     const pattern = /\d{4}-\d{4}/; // Matches "2022-2024"
 
     if (!pattern.test(filename)) {
+      console.error("Filename validation failed:", filename);
       alert("Filename must include batch year in format YYYY-YYYY (e.g., students_2023-2026.xlsx)");
       input.value = ""; // Clear the file input
       return false;
     }
 
+    console.log("Filename validation passed, submitting form...");
     // Valid filename, submit the form
-    input.form.submit();
+    const form = input.form;
+    if (!form) {
+      console.error("Form not found!");
+      alert("Error: Form element not found. Please refresh and try again.");
+      return false;
+    }
+
+    console.log("Submitting form to:", form.action || window.location.href);
+    form.submit();
   }
 
   function validateFilename() {

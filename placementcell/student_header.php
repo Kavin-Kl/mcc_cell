@@ -207,12 +207,8 @@ body {
     right: 10px;
     font-size: 22px;
     cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.sidebar.open .profile i.bx-log-out {
     opacity: 1;
+    transition: opacity 0.3s ease;
 }
 
 .home-section {
@@ -374,7 +370,7 @@ function closeSidebar() {
 
 function logout() {
   if (confirm("Are you sure you want to logout?")) {
-    window.location.href = "student_login.php?logout=1";
+    window.location.href = "student_logout.php";
   }
 }
 </script>

@@ -204,10 +204,14 @@ while ($drive = $drives_result->fetch_assoc()) {
         continue;
     }
 }
-// NOTE: Automatic sync of placed_students from applications was removed
-// here because it was wiping rows imported from the backup/Excel.
-// If you ever want to run sync_placed_students($conn), do it from a
-// separate maintenance script instead of on every dashboard load.
+// Sync placed students once per page load (not per role)
+include_once __DIR__ . '/sync_placed_students.php';
+$sync_result = sync_placed_students($conn);
+// Log any errors for debugging (optional)
+if (!empty($sync_result['errors'])) {
+    error_log("Sync errors: " . implode(", ", $sync_result['errors']));
+}
+
 // Top Dashboard Boxes
 $total_students = $conn->query("SELECT COUNT(*) AS count FROM students")->fetch_assoc()['count'];
 $total_companies = $conn->query("SELECT COUNT(DISTINCT company_name) AS count FROM drives")->fetch_assoc()['count'];
@@ -374,20 +378,21 @@ function getCompanyProgress($status) {
     $stmt->execute();
     $role_status = $stmt->get_result()->fetch_assoc();
 
-    include_once __DIR__ . '/sync_placed_students.php';
-    sync_placed_students($conn);
+    // Sync is expensive - only run once at page load, not for every role
+    // (moved outside the foreach loop)
 
-    // Get hired count separately (only based on joining_status)
+    // Get hired count separately (filtered by drive_id and role_id for accuracy)
     $hired_stmt = $conn->prepare("
-        SELECT COUNT(*) AS hired_count 
-        FROM placed_students 
-        WHERE company_name = ? 
-        AND role_id = ? 
+        SELECT COUNT(DISTINCT student_id) AS hired_count
+        FROM placed_students
+        WHERE drive_id = ?
+        AND role_id = ?
     ");
-    $hired_stmt->bind_param("si", $companyName, $role['role_id']);
+    $hired_stmt->bind_param("ii", $drive_id, $role['role_id']);
     $hired_stmt->execute();
     $hired_result = $hired_stmt->get_result()->fetch_assoc();
     $current_hired_count = (int)($hired_result['hired_count'] ?? 0);
+    $hired_stmt->close();
 
     if ($role_status) {
         $status = strtolower(trim($role_status['final_status']));
